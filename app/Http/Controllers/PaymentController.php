@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\PaymentRequest;
+use App\Http\Requests\CardPaymentRequest;
 use App\Models\Order;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class PaymentController extends Controller
 {
@@ -12,52 +16,73 @@ class PaymentController extends Controller
         $this->middleware('auth');
     }
 
-    public function select(Order $order)
+    public function select(Order $order): RedirectResponse|Response
     {
         $this->ensureOrderOwner($order);
 
         if ($this->alreadyPaid($order)) {
-            return redirect()->route('payment.success');
+            return redirect()->route('payment.success', $order);
         }
 
-        return view('payments.select', compact('order'));
+        return $this->htmlResponse('payments.select', compact('order'));
     }
 
-    public function show(Order $order)
+    public function cardForm(Order $order): RedirectResponse|Response
     {
         $this->ensureOrderOwner($order);
 
         if ($this->alreadyPaid($order)) {
-            return redirect()->route('payment.success');
+            return redirect()->route('payment.success', $order);
         }
 
-        return view('payments.form', compact('order'));
+        return $this->htmlResponse('payments.form', compact('order'));
     }
 
-    public function process(PaymentRequest $request, Order $order)
+    public function processCard(CardPaymentRequest $request, Order $order): RedirectResponse
     {
         $this->ensureOrderOwner($order);
 
         if ($this->alreadyPaid($order)) {
-            return redirect()->route('payment.success');
+            return redirect()->route('payment.success', $order);
         }
 
-        $order->update([
-            'payment_status' => Order::PAYMENT_PAID,
-            'status' => Order::STATUS_PAID,
-        ]);
+        try {
+            $reference = sprintf('SIM-%s', Str::upper(Str::random(12)));
 
-        session(['payment_success_order_id' => $order->id]);
+            $order->update([
+                'payment_status' => Order::PAYMENT_PAID,
+                'status' => Order::STATUS_PAID,
+                'payment_method' => Order::PAYMENT_METHOD_CARD,
+                'payment_reference' => $reference,
+                'paid_at' => now(),
+            ]);
 
-        return redirect()->route('payment.success')->with('status', 'Оплата успішно підтверджена.');
+            Log::info('Card payment simulation succeeded', [
+                'order_id' => $order->id,
+                'payment_reference' => $reference,
+                'user_id' => $order->user_id,
+            ]);
+
+            return redirect()->route('payment.success', $order)->with('status', 'Оплату успішно виконано.');
+        } catch (\Throwable $exception) {
+            Log::error('Card payment failed', [
+                'order_id' => $order->id,
+                'error' => $exception->getMessage(),
+                'user_id' => $order->user_id,
+            ]);
+
+            return redirect()
+                ->route('payment.fail', $order)
+                ->with('payment_error', 'Сервер не зміг обробити платіж. Спробуйте ще раз.');
+        }
     }
 
-    public function selectCod(Order $order)
+    public function selectCod(Order $order): RedirectResponse
     {
         $this->ensureOrderOwner($order);
 
         if ($this->alreadyPaid($order)) {
-            return redirect()->route('payment.success');
+            return redirect()->route('payment.success', $order);
         }
 
         $order->update([
@@ -68,20 +93,28 @@ class PaymentController extends Controller
         return redirect()->route('orders')->with('status', 'Ваше замовлення буде оброблене післяплатою.');
     }
 
-    public function success()
+    public function success(Order $order): RedirectResponse|Response
     {
-        $orderId = session('payment_success_order_id');
+        $this->ensureOrderOwner($order);
 
-        $order = Order::where('id', $orderId)
-            ->where('user_id', auth()->id())
-            ->where('status', Order::STATUS_PAID)
-            ->first();
-
-        if (! $order) {
-            return redirect()->route('orders')->with('error', 'Замовлення не знайдено або вже оплачено.');
+        if (! $this->alreadyPaid($order)) {
+            return redirect()->route('payment.select', $order)->with('error', 'Статус замовлення ще не оновлено.');
         }
 
-        return view('payments.success', compact('order'));
+        return $this->htmlResponse('payments.success', compact('order'));
+    }
+
+    public function fail(Order $order): RedirectResponse|Response
+    {
+        $this->ensureOrderOwner($order);
+
+        if ($this->alreadyPaid($order)) {
+            return redirect()->route('payment.success', $order);
+        }
+
+        $paymentError = session('payment_error') ?? 'Платіж відхилено. Спробуйте ще раз.';
+
+        return $this->htmlResponse('payments.fail', compact('order', 'paymentError'));
     }
 
     private function ensureOrderOwner(Order $order): void
@@ -92,5 +125,12 @@ class PaymentController extends Controller
     private function alreadyPaid(Order $order): bool
     {
         return $order->payment_status === Order::PAYMENT_PAID || $order->status === Order::STATUS_PAID;
+    }
+
+    private function htmlResponse(string $view, array $data = []): Response
+    {
+        return response()
+            ->view($view, $data)
+            ->header('Content-Type', 'text/html; charset=UTF-8');
     }
 }

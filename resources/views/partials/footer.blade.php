@@ -1,7 +1,7 @@
 <div class="footer-grid">
     <div class="footer-grid__block">
         <h4>Контактна інформація</h4>
-        <p>вул. Хрещатик, 20, Київ</p>
+        <p>вул. Грешатика, 20, Київ</p>
         <p>+38 (044) 555-33-77</p>
         <p>support@technodim.local</p>
     </div>

@@ -20,6 +20,7 @@ class Order extends Model
 
     public const PAYMENT_PENDING = 'pending';
     public const PAYMENT_PAID = 'paid';
+    public const PAYMENT_METHOD_CARD = 'card';
 
     public const STATUS_LABELS = [
         self::STATUS_NEW => 'Нове',
@@ -45,6 +46,9 @@ class Order extends Model
         'total',
         'status',
         'payment_status',
+        'payment_method',
+        'payment_reference',
+        'paid_at',
         'notes',
         'postal_code',
     ];
@@ -52,6 +56,7 @@ class Order extends Model
     protected $casts = [
         'shipping_cost' => 'decimal:2',
         'total' => 'decimal:2',
+        'paid_at' => 'datetime',
     ];
 
     public function user(): BelongsTo

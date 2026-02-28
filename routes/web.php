@@ -88,9 +88,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
     Route::get('/payment/select/{order}', [PaymentController::class, 'select'])->name('payment.select');
     Route::post('/payment/select/{order}/cod', [PaymentController::class, 'selectCod'])->name('payment.select.cod');
-    Route::get('/payment/{order}', [PaymentController::class, 'show'])->name('payment');
-    Route::post('/payment/{order}', [PaymentController::class, 'process'])->name('payment.process');
-    Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');
+    Route::get('/payment/card/{order}', [PaymentController::class, 'cardForm'])->name('payment.card');
+    Route::post('/payment/card/{order}', [PaymentController::class, 'processCard'])->name('payment.card.process');
+    Route::get('/payment/success/{order}', [PaymentController::class, 'success'])->name('payment.success');
+    Route::get('/payment/fail/{order}', [PaymentController::class, 'fail'])->name('payment.fail');
 });
 
 Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {

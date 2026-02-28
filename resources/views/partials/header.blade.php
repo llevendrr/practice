@@ -28,7 +28,7 @@
             <a href="{{ route('profile') }}" class="auth-button auth-button--primary">Профіль</a>
             <form action="{{ route('logout') }}" method="post">
                 @csrf
-                <button type="submit" class="auth-button">Вихід</button>
+                <button type="submit" class="auth-button">Вийти</button>
             </form>
         @endguest
     </div>
@@ -39,7 +39,7 @@
     @endphp
 
     <a class="cart-pill" href="{{ route('cart') }}" aria-label="Кошик">
-        <span class="cart-pill__icon">🛍</span>
+        <span class="cart-pill__icon">🛒</span>
         <span>{{ $cartTotal }} {{ $cartLabel }}</span>
     </a>
 
@@ -48,5 +48,5 @@
         <button type="submit" aria-label="Пошук">🔍</button>
     </form>
 
-    <button type="button" class="theme-toggle" data-theme-toggle aria-label="Перемкнути тему">Тема / Світла</button>
+    <button type="button" class="theme-toggle" data-theme-toggle aria-label="Перемкнути тему">Темна / Світла</button>
 </div>

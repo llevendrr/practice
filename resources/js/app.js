@@ -125,7 +125,7 @@ const formatExpiration = (value = '') => {
     return `${digits.slice(0, 2)}/${digits.slice(2)}`;
 };
 
-const formatCvv = (value = '') => value.replace(/\D/g, '').slice(0, 3);
+const formatCvv = (value = '') => value.replace(/\D/g, '').slice(0, 4);
 
 const maskCreditField = (input) => {
     const type = input.dataset.creditMask;

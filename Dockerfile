@@ -39,8 +39,16 @@ COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-scripts --optimize-autoloader --no-interaction --no-progress --prefer-dist
 
 COPY . .
+RUN mkdir -p storage/framework/views \
+    storage/framework/cache \
+    storage/framework/sessions \
+    bootstrap/cache
+RUN chmod -R 777 storage bootstrap/cache
 RUN composer dump-autoload --optimize
 RUN php artisan package:discover --ansi
+RUN php artisan config:cache \
+    && php artisan route:cache \
+    && php artisan view:cache || true
 COPY --from=node-build /app/public/build ./public/build
 
 RUN chown -R www-data:www-data storage bootstrap/cache public

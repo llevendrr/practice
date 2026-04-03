@@ -36,9 +36,11 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 FROM base AS app
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress --prefer-dist
+RUN composer install --no-dev --no-scripts --optimize-autoloader --no-interaction --no-progress --prefer-dist
 
 COPY . .
+RUN composer dump-autoload --optimize
+RUN php artisan package:discover --ansi
 COPY --from=node-build /app/public/build ./public/build
 
 RUN chown -R www-data:www-data storage bootstrap/cache public

@@ -46,10 +46,8 @@ RUN mkdir -p storage/framework/views \
 RUN chmod -R 777 storage bootstrap/cache
 RUN composer dump-autoload --optimize
 RUN php artisan package:discover --ansi
-RUN php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache || true
 COPY --from=node-build /app/public/build ./public/build
+RUN test -f public/build/manifest.json
 
 RUN chown -R www-data:www-data storage bootstrap/cache public
 

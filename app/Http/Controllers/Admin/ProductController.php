@@ -8,8 +8,9 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use ImageKit\ImageKit;
 
 class ProductController extends Controller
 {
@@ -34,11 +35,21 @@ class ProductController extends Controller
                 ->withInput($request->except('action'));
         }
 
-        $product = Product::create(
-            $this->formatInput($request)
-        );
+        try {
+            DB::transaction(function () use ($request): void {
+                $product = Product::create(
+                    $this->formatInput($request)
+                );
 
-        $this->handleImages($product, $request);
+                $this->handleImages($product, $request);
+            });
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return back()
+                ->withErrors(['images' => 'Не вдалося завантажити зображення в ImageKit. Спробуйте ще раз.'])
+                ->withInput();
+        }
 
         return redirect()->route('admin.products.index')->with('status', 'Товар створено.');
     }
@@ -72,11 +83,21 @@ class ProductController extends Controller
                 ->withInput($request->except('action'));
         }
 
-        $product->update(
-            $this->formatInput($request, $product)
-        );
+        try {
+            DB::transaction(function () use ($request, $product): void {
+                $product->update(
+                    $this->formatInput($request, $product)
+                );
 
-        $this->handleImages($product, $request);
+                $this->handleImages($product, $request);
+            });
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return back()
+                ->withErrors(['images' => 'Не вдалося завантажити зображення в ImageKit. Зміни не збережено.'])
+                ->withInput();
+        }
 
         return redirect()->route('admin.products.index')->with('status', 'Товар оновлено.');
     }
@@ -224,14 +245,9 @@ class ProductController extends Controller
             return;
         }
 
-        $images = ProductImage::where('product_id', $product->id)
+        ProductImage::where('product_id', $product->id)
             ->whereIn('id', $deleteIds)
-            ->get();
-
-        foreach ($images as $image) {
-            Storage::disk('public')->delete($image->path);
-            $image->delete();
-        }
+            ->delete();
     }
 
     protected function updateImageSort(Product $product, ProductRequest $request): void
@@ -249,23 +265,35 @@ class ProductController extends Controller
 
     protected function storeUploadedImages(Product $product, ProductRequest $request): void
     {
+        if ($request->hasFile('image')) {
+            $singleFile = $request->file('image');
+
+            if ($singleFile instanceof UploadedFile) {
+                $this->storeImage($product, $singleFile);
+            }
+        }
+
         if (! $request->hasFile('images')) {
             return;
         }
 
-        foreach ($request->file('images') as $file) {
+        foreach ($request->file('images', []) as $file) {
+            if (! $file instanceof UploadedFile) {
+                continue;
+            }
+
             $this->storeImage($product, $file);
         }
     }
 
     protected function storeImage(Product $product, UploadedFile $file): void
     {
-        $path = $this->persistUploadedFile($file);
+        $imageUrl = $this->uploadImageToImageKit($file);
         $hasMain = $product->images()->where('is_main', true)->exists();
         $nextSort = (($product->images()->max('sort')) ?? 0) + 1;
 
         $product->images()->create([
-            'path' => $path,
+            'path' => $imageUrl,
             'is_main' => ! $hasMain,
             'sort' => $nextSort,
         ]);
@@ -295,27 +323,40 @@ class ProductController extends Controller
         }
     }
 
-    protected function persistUploadedFile(UploadedFile $file): string
+    protected function uploadImageToImageKit(UploadedFile $file): string
     {
-        $extension = strtolower($file->getClientOriginalExtension());
+        $imageKit = new ImageKit(
+            config('services.imagekit.public_key'),
+            config('services.imagekit.private_key'),
+            config('services.imagekit.url_endpoint')
+        );
 
-        if ($extension === 'heic' && class_exists(\Imagick::class)) {
-            try {
-                $imagick = new \Imagick();
-                $imagick->readImage($file->getRealPath());
-                $imagick->setImageFormat('webp');
-                $imagick->setImageCompressionQuality(88);
-                $path = 'products/' . Str::uuid() . '.webp';
-                Storage::disk('public')->put($path, $imagick->getImagesBlob());
-                $imagick->clear();
-                $imagick->destroy();
+        $fileContents = file_get_contents($file->getRealPath());
 
-                return $path;
-            } catch (\Throwable $exception) {
-                // Fallback to storing the original file if conversion fails.
-            }
+        if ($fileContents === false) {
+            throw new \RuntimeException('Не вдалося прочитати файл для завантаження в ImageKit.');
         }
 
-        return $file->store('products', 'public');
+        $upload = $imageKit->upload([
+            'file' => base64_encode($fileContents),
+            'fileName' => $this->imageFileName($file),
+        ]);
+
+        $uploadedUrl = data_get($upload, 'result.url');
+
+        if (! is_string($uploadedUrl) || $uploadedUrl === '') {
+            throw new \RuntimeException('ImageKit не повернув URL завантаженого зображення.');
+        }
+
+        return $uploadedUrl;
+    }
+
+    protected function imageFileName(UploadedFile $file): string
+    {
+        $baseName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $extension = strtolower($file->getClientOriginalExtension() ?: 'jpg');
+        $safeBaseName = Str::slug($baseName) ?: 'product-image';
+
+        return $safeBaseName . '-' . Str::uuid() . '.' . $extension;
     }
 }

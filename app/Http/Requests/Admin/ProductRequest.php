@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Models\Category;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Models\Category;
 use Illuminate\Validation\Validator;
 
 class ProductRequest extends FormRequest
@@ -54,6 +54,7 @@ class ProductRequest extends FormRequest
             'main_image' => ['nullable', 'integer', 'exists:product_images,id'],
             'delete_images' => ['nullable', 'array'],
             'delete_images.*' => ['integer', 'exists:product_images,id'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif,svg,heic', 'max:10240'],
             'images' => ['nullable', 'array'],
             'images.*' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif,svg,heic', 'max:10240'],
         ]);
@@ -125,7 +126,7 @@ class ProductRequest extends FormRequest
 
         $remainingCount = max(0, count($existingIds) - count(array_intersect($existingIds, $deleteIds)));
 
-        if ($remainingCount === 0 && ! $this->hasFile('images')) {
+        if ($remainingCount === 0 && ! $this->hasFile('images') && ! $this->hasFile('image')) {
             $validator->errors()->add('images', 'Потрібно додати хоча б одне фото товару.');
         }
     }

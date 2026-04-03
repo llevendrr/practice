@@ -19,26 +19,24 @@ RUN apt-get update \
         libjpeg-dev \
         libfreetype6-dev \
         libzip-dev \
+        libxml2-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install \
-        pdo \
         pdo_mysql \
         mbstring \
         exif \
         pcntl \
         bcmath \
         gd \
-        tokenizer \
+        zip \
         xml \
-        ctype \
-        fileinfo \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 FROM base AS app
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress --prefer-dist
 
 COPY . .
 COPY --from=node-build /app/public/build ./public/build
@@ -47,4 +45,4 @@ RUN chown -R www-data:www-data storage bootstrap/cache public
 
 USER www-data
 
-CMD ["sh","-c","set -e; php artisan storage:link || true; php artisan config:cache; php artisan route:cache; php artisan view:cache; php -S 0.0.0.0:$PORT -t public"]
+CMD ["sh","-c","php artisan storage:link || true; php artisan config:cache || true; php artisan route:cache || true; php artisan view:cache || true; exec php -S 0.0.0.0:$PORT -t public"]

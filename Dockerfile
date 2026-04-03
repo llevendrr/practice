@@ -11,26 +11,20 @@ RUN npm run build
 FROM php:8.2-cli AS base
 WORKDIR /var/www/html
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        git \
-        unzip \
-        libpng-dev \
-        libjpeg-dev \
-        libfreetype6-dev \
-        libzip-dev \
-        libxml2-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install \
-        pdo_mysql \
-        mbstring \
-        exif \
-        pcntl \
-        bcmath \
-        gd \
-        zip \
-        xml \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    unzip \
+    libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    libxml2-dev \
+    zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
+
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg
+RUN docker-php-ext-install -j$(nproc) gd
+RUN docker-php-ext-install -j$(nproc) pdo_mysql mbstring exif bcmath zip xml
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 

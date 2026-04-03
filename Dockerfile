@@ -8,7 +8,7 @@ COPY vite.config.js ./
 COPY resources ./resources
 RUN npm run build
 
-FROM php:8.2-cli AS base
+FROM php:8.4-cli AS base
 WORKDIR /var/www/html
 
 RUN apt-get update && apt-get install -y --no-install-recommends \

@@ -1,13 +1,5 @@
 # syntax=docker/dockerfile:1
 
-FROM node:20-alpine AS node-build
-WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci
-COPY vite.config.js ./
-COPY resources ./resources
-RUN npm run build
-
 FROM php:8.4-cli AS base
 WORKDIR /var/www/html
 
@@ -34,6 +26,15 @@ RUN docker-php-ext-install -j$(nproc) xml
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+FROM node:20-alpine AS frontend
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm install
+COPY vite.config.js ./
+COPY resources ./resources
+RUN npm run build
+RUN test -f public/build/manifest.json
+
 FROM base AS app
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-scripts --optimize-autoloader --no-interaction --no-progress --prefer-dist
@@ -46,11 +47,13 @@ RUN mkdir -p storage/framework/views \
 RUN chmod -R 777 storage bootstrap/cache
 RUN composer dump-autoload --optimize
 RUN php artisan package:discover --ansi
-COPY --from=node-build /app/public/build ./public/build
+COPY --from=frontend /app/public/build /var/www/html/public/build
 RUN test -f public/build/manifest.json
 
 RUN chown -R www-data:www-data storage bootstrap/cache public
 
 USER www-data
 
-CMD ["sh","-c","php artisan storage:link || true; php artisan config:cache || true; php artisan route:cache || true; php artisan view:cache || true; exec php -S 0.0.0.0:$PORT -t public"]
+EXPOSE 10000
+
+CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-10000} -t public"]

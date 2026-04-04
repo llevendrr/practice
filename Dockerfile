@@ -56,4 +56,4 @@ USER www-data
 
 EXPOSE 10000
 
-CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-10000} -t public"]
+CMD ["sh", "-c", "php artisan config:clear && php artisan config:cache && php -S 0.0.0.0:${PORT:-10000} -t public"]

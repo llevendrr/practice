@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\ProductImage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use ImageKit\ImageKit;
 
@@ -44,6 +45,7 @@ class ProductController extends Controller
                 $this->handleImages($product, $request);
             });
         } catch (\Throwable $exception) {
+            $this->logImageUploadException('store', $exception, $request);
             report($exception);
 
             return back()
@@ -92,6 +94,7 @@ class ProductController extends Controller
                 $this->handleImages($product, $request);
             });
         } catch (\Throwable $exception) {
+            $this->logImageUploadException('update', $exception, $request, $product->id);
             report($exception);
 
             return back()
@@ -265,7 +268,19 @@ class ProductController extends Controller
 
     protected function storeUploadedImages(Product $product, ProductRequest $request): void
     {
-        if ($request->hasFile('image')) {
+        $hasSingle = $request->hasFile('image');
+        $hasMultiple = $request->hasFile('images');
+
+        if (! $hasSingle && ! $hasMultiple) {
+            Log::warning('Image upload skipped: no file fields found in request.', [
+                'product_id' => $product->id,
+                'files_keys' => array_keys($request->allFiles()),
+            ]);
+
+            return;
+        }
+
+        if ($hasSingle) {
             $singleFile = $request->file('image');
 
             if ($singleFile instanceof UploadedFile) {
@@ -273,7 +288,7 @@ class ProductController extends Controller
             }
         }
 
-        if (! $request->hasFile('images')) {
+        if (! $hasMultiple) {
             return;
         }
 
@@ -322,30 +337,71 @@ class ProductController extends Controller
             }
         }
     }
-
     protected function uploadImageToImageKit(UploadedFile $file): string
     {
-        $imageKit = new ImageKit(
-            config('services.imagekit.public_key'),
-            config('services.imagekit.private_key'),
-            config('services.imagekit.url_endpoint')
-        );
+        $publicKey = (string) config('services.imagekit.public_key', '');
+        $privateKey = (string) config('services.imagekit.private_key', '');
+        $urlEndpoint = (string) config('services.imagekit.url_endpoint', '');
 
-        $fileContents = file_get_contents($file->getRealPath());
+        if ($publicKey === '' || $privateKey === '' || $urlEndpoint === '') {
+            Log::error('ImageKit credentials are missing in runtime config.', [
+                'public_key_set' => $publicKey !== '',
+                'private_key_set' => $privateKey !== '',
+                'url_endpoint_set' => $urlEndpoint !== '',
+            ]);
 
-        if ($fileContents === false) {
-            throw new \RuntimeException('Не вдалося прочитати файл для завантаження в ImageKit.');
+            throw new \RuntimeException('ImageKit credentials are not configured.');
         }
 
-        $upload = $imageKit->upload([
-            'file' => base64_encode($fileContents),
-            'fileName' => $this->imageFileName($file),
-        ]);
+        $imageKit = new ImageKit($publicKey, $privateKey, $urlEndpoint);
+
+        $realPath = $file->getRealPath();
+
+        if (! $realPath || ! is_readable($realPath)) {
+            Log::error('Image upload failed: uploaded file path is not readable.', [
+                'original_name' => $file->getClientOriginalName(),
+                'mime_type' => $file->getMimeType(),
+                'size' => $file->getSize(),
+                'real_path' => $realPath,
+            ]);
+
+            throw new \RuntimeException('Failed to read uploaded file before ImageKit upload.');
+        }
+
+        $fileContents = file_get_contents($realPath);
+
+        if ($fileContents === false) {
+            throw new \RuntimeException('Failed to read file for upload to ImageKit.');
+        }
+
+        try {
+            $upload = $imageKit->upload([
+                'file' => base64_encode($fileContents),
+                'fileName' => $this->imageFileName($file),
+            ]);
+        } catch (\Throwable $exception) {
+            Log::error('ImageKit upload threw an exception.', [
+                'message' => $exception->getMessage(),
+                'class' => get_class($exception),
+                'original_name' => $file->getClientOriginalName(),
+                'mime_type' => $file->getMimeType(),
+                'size' => $file->getSize(),
+            ]);
+
+            throw new \RuntimeException('ImageKit upload request failed.', previous: $exception);
+        }
 
         $uploadedUrl = data_get($upload, 'result.url');
 
         if (! is_string($uploadedUrl) || $uploadedUrl === '') {
-            throw new \RuntimeException('ImageKit не повернув URL завантаженого зображення.');
+            Log::error('ImageKit upload response does not contain result.url.', [
+                'response_message' => data_get($upload, 'message'),
+                'response_error' => data_get($upload, 'error'),
+                'response_result' => data_get($upload, 'result'),
+                'original_name' => $file->getClientOriginalName(),
+            ]);
+
+            throw new \RuntimeException('ImageKit did not return uploaded image URL.');
         }
 
         return $uploadedUrl;
@@ -359,4 +415,24 @@ class ProductController extends Controller
 
         return $safeBaseName . '-' . Str::uuid() . '.' . $extension;
     }
+
+    protected function logImageUploadException(
+        string $operation,
+        \Throwable $exception,
+        ProductRequest $request,
+        ?int $productId = null
+    ): void {
+        Log::error("Product {$operation} failed during image processing.", [
+            'product_id' => $productId,
+            'message' => $exception->getMessage(),
+            'class' => get_class($exception),
+            'has_image' => $request->hasFile('image'),
+            'has_images' => $request->hasFile('images'),
+            'files_keys' => array_keys($request->allFiles()),
+            'imagekit_public_key_set' => filled(config('services.imagekit.public_key')),
+            'imagekit_private_key_set' => filled(config('services.imagekit.private_key')),
+            'imagekit_url_endpoint_set' => filled(config('services.imagekit.url_endpoint')),
+        ]);
+    }
 }
+

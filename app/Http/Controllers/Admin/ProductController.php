@@ -339,15 +339,38 @@ class ProductController extends Controller
     }
     protected function uploadImageToImageKit(UploadedFile $file): string
     {
-        $publicKey = (string) config('services.imagekit.public_key', '');
-        $privateKey = (string) config('services.imagekit.private_key', '');
-        $urlEndpoint = (string) config('services.imagekit.url_endpoint', '');
+        $rawPublicKeyEnv = (string) env('IMAGEKIT_PUBLIC_KEY');
+        $rawPrivateKeyEnv = (string) env('IMAGEKIT_PRIVATE_KEY');
+        $rawUrlEndpointEnv = (string) env('IMAGEKIT_URL_ENDPOINT');
+
+        $publicKey = trim((string) env('IMAGEKIT_PUBLIC_KEY'));
+        $privateKey = trim((string) env('IMAGEKIT_PRIVATE_KEY'));
+        $urlEndpoint = trim((string) env('IMAGEKIT_URL_ENDPOINT'));
+
+        $configPublicKey = trim((string) config('services.imagekit.public_key', ''));
+        $configPrivateKey = trim((string) config('services.imagekit.private_key', ''));
+        $configUrlEndpoint = trim((string) config('services.imagekit.url_endpoint', ''));
+
+        Log::info('ImageKit upload diagnostics before upload.', [
+            'public_key_exists' => $publicKey !== '',
+            'private_key_exists' => $privateKey !== '',
+            'url_endpoint_exists' => $urlEndpoint !== '',
+            'using_endpoint' => $urlEndpoint,
+            'public_key_has_outer_whitespace' => $publicKey !== $rawPublicKeyEnv,
+            'private_key_has_outer_whitespace' => $privateKey !== $rawPrivateKeyEnv,
+            'url_endpoint_has_outer_whitespace' => $urlEndpoint !== $rawUrlEndpointEnv,
+            'config_public_matches_env' => $configPublicKey === $publicKey,
+            'config_private_matches_env' => $configPrivateKey === $privateKey,
+            'config_endpoint_matches_env' => $configUrlEndpoint === $urlEndpoint,
+            'original_name' => $file->getClientOriginalName(),
+        ]);
 
         if ($publicKey === '' || $privateKey === '' || $urlEndpoint === '') {
-            Log::error('ImageKit credentials are missing in runtime config.', [
+            Log::error('ImageKit credentials are missing in runtime env.', [
                 'public_key_set' => $publicKey !== '',
                 'private_key_set' => $privateKey !== '',
                 'url_endpoint_set' => $urlEndpoint !== '',
+                'using_endpoint' => $urlEndpoint,
             ]);
 
             throw new \RuntimeException('ImageKit credentials are not configured.');
@@ -374,16 +397,25 @@ class ProductController extends Controller
             throw new \RuntimeException('Failed to read file for upload to ImageKit.');
         }
 
+        $fileName = $this->imageFileName($file);
+
         try {
             $upload = $imageKit->upload([
                 'file' => base64_encode($fileContents),
-                'fileName' => $this->imageFileName($file),
+                'fileName' => $fileName,
             ]);
         } catch (\Throwable $exception) {
+            $response = method_exists($exception, 'getResponse')
+                ? $exception->getResponse()
+                : [];
+
             Log::error('ImageKit upload threw an exception.', [
                 'message' => $exception->getMessage(),
                 'class' => get_class($exception),
+                'error' => data_get($response, 'error'),
+                'result' => data_get($response, 'result'),
                 'original_name' => $file->getClientOriginalName(),
+                'file_name' => $fileName,
                 'mime_type' => $file->getMimeType(),
                 'size' => $file->getSize(),
             ]);
@@ -395,10 +427,11 @@ class ProductController extends Controller
 
         if (! is_string($uploadedUrl) || $uploadedUrl === '') {
             Log::error('ImageKit upload response does not contain result.url.', [
-                'response_message' => data_get($upload, 'message'),
-                'response_error' => data_get($upload, 'error'),
-                'response_result' => data_get($upload, 'result'),
+                'message' => data_get($upload, 'message'),
+                'error' => data_get($upload, 'error'),
+                'result' => data_get($upload, 'result'),
                 'original_name' => $file->getClientOriginalName(),
+                'file_name' => $fileName,
             ]);
 
             throw new \RuntimeException('ImageKit did not return uploaded image URL.');
@@ -429,9 +462,9 @@ class ProductController extends Controller
             'has_image' => $request->hasFile('image'),
             'has_images' => $request->hasFile('images'),
             'files_keys' => array_keys($request->allFiles()),
-            'imagekit_public_key_set' => filled(config('services.imagekit.public_key')),
-            'imagekit_private_key_set' => filled(config('services.imagekit.private_key')),
-            'imagekit_url_endpoint_set' => filled(config('services.imagekit.url_endpoint')),
+            'imagekit_public_key_set' => trim((string) env('IMAGEKIT_PUBLIC_KEY')) !== '',
+            'imagekit_private_key_set' => trim((string) env('IMAGEKIT_PRIVATE_KEY')) !== '',
+            'imagekit_url_endpoint_set' => trim((string) env('IMAGEKIT_URL_ENDPOINT')) !== '',
         ]);
     }
 }

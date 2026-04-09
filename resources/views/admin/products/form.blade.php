@@ -153,16 +153,31 @@
                     </label>
                 </div>
                 <div class="field-group image-upload-field">
+                    <label for="image">Головне фото</label>
+                    <input
+                        id="image"
+                        name="image"
+                        type="file"
+                        accept="image/jpeg,image/jpg,image/png,image/webp"
+                    />
+                    <p class="muted-note">
+                        Якщо товар уже має головне фото, новий файл замінить його.
+                    </p>
+                    @error('image')
+                        <span class="error-text">{{ $message }}</span>
+                    @enderror
+                </div>
+                <div class="field-group image-upload-field">
                     <label for="images">Фото</label>
                     <input
                         id="images"
                         name="images[]"
                         type="file"
                         multiple
-                        accept="image/jpeg,image/jpg,image/png,image/webp,image/gif,image/svg+xml,image/heic"
+                        accept="image/jpeg,image/jpg,image/png,image/webp"
                     />
                     <p class="muted-note">
-                        Підтримуються JPG, JPEG, PNG, WEBP, GIF, SVG та HEIC (якщо доступно). Максимальний розмір — 10 МБ на файл.
+                        Підтримуються JPG, JPEG, PNG та WEBP. Максимальний розмір — 10 МБ на файл.
                     </p>
                     @error('images')
                         <span class="error-text">{{ $message }}</span>
@@ -179,13 +194,13 @@
                                 <img src="{{ $image->url }}" alt="Фото товару {{ $product->name }}" />
                                 <div class="product-image-card__actions">
                                     <label class="image-radio">
-                                        <input type="radio" name="main_image" value="{{ $image->id }}" {{ $image->is_main ? 'checked' : '' }} />
+                                        <input type="radio" name="main_image" value="{{ $image->id }}" {{ $image->is_primary ? 'checked' : '' }} />
                                         <span>Головне фото</span>
                                     </label>
                                     <div class="product-image-card__controls">
                                         <div class="product-image-card__sort">
                                             <span>Сортування</span>
-                                            <input type="number" name="image_sort[{{ $image->id }}]" value="{{ $image->sort }}" />
+                                            <input type="number" name="image_sort[{{ $image->id }}]" value="{{ $image->sort_order }}" />
                                         </div>
                                         <label class="image-delete">
                                             <input type="checkbox" name="delete_images[]" value="{{ $image->id }}" />

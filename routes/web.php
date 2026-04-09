@@ -20,6 +20,7 @@ use App\Http\Controllers\SupportMessageController;
 use App\Http\Controllers\SupportThreadController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductImageController;
 use App\Http\Controllers\ReviewController;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -54,6 +55,7 @@ Route::view('/about', 'pages.about')->name('about');
 Route::view('/delivery', 'pages.delivery')->name('delivery');
 Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog');
 Route::get('/product/{product:slug}', [ProductController::class, 'show'])->name('product.show');
+Route::get('/product-images/{productImage}', [ProductImageController::class, 'show'])->name('product-images.show');
 Route::post('/product/{product:slug}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
 
 Route::get('/cart', [CartController::class, 'index'])->name('cart');

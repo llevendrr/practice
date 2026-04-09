@@ -11,7 +11,6 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use ImageKit\ImageKit;
 
 class ProductController extends Controller
 {
@@ -49,7 +48,7 @@ class ProductController extends Controller
             report($exception);
 
             return back()
-                ->withErrors(['images' => 'Не вдалося завантажити зображення в ImageKit. Спробуйте ще раз.'])
+                ->withErrors(['images' => 'Не вдалося зберегти зображення у базі даних. Спробуйте ще раз.'])
                 ->withInput();
         }
 
@@ -98,7 +97,7 @@ class ProductController extends Controller
             report($exception);
 
             return back()
-                ->withErrors(['images' => 'Не вдалося завантажити зображення в ImageKit. Зміни не збережено.'])
+                ->withErrors(['images' => 'Не вдалося зберегти зображення у базі даних. Зміни не збережено.'])
                 ->withInput();
         }
 
@@ -262,34 +261,22 @@ class ProductController extends Controller
 
             ProductImage::where('id', $id)
                 ->where('product_id', $product->id)
-                ->update(['sort' => (int) $sort]);
+                ->update(['sort_order' => (int) $sort]);
         }
     }
 
     protected function storeUploadedImages(Product $product, ProductRequest $request): void
     {
-        $hasSingle = $request->hasFile('image');
-        $hasMultiple = $request->hasFile('images');
-
-        if (! $hasSingle && ! $hasMultiple) {
-            Log::warning('Image upload skipped: no file fields found in request.', [
-                'product_id' => $product->id,
-                'files_keys' => array_keys($request->allFiles()),
-            ]);
-
+        if (! $request->hasFile('image') && ! $request->hasFile('images')) {
             return;
         }
 
-        if ($hasSingle) {
+        if ($request->hasFile('image')) {
             $singleFile = $request->file('image');
 
             if ($singleFile instanceof UploadedFile) {
-                $this->storeImage($product, $singleFile);
+                $this->replacePrimaryImage($product, $singleFile);
             }
-        }
-
-        if (! $hasMultiple) {
-            return;
         }
 
         foreach ($request->file('images', []) as $file) {
@@ -297,21 +284,60 @@ class ProductController extends Controller
                 continue;
             }
 
-            $this->storeImage($product, $file);
+            $this->storeGalleryImage($product, $file);
         }
     }
 
-    protected function storeImage(Product $product, UploadedFile $file): void
+    protected function replacePrimaryImage(Product $product, UploadedFile $file): void
     {
-        $imageUrl = $this->uploadImageToImageKit($file);
-        $hasMain = $product->images()->where('is_main', true)->exists();
-        $nextSort = (($product->images()->max('sort')) ?? 0) + 1;
+        $payload = $this->buildImagePayload($file);
+        $currentPrimary = $product->images()->where('is_primary', true)->first();
 
-        $product->images()->create([
-            'path' => $imageUrl,
-            'is_main' => ! $hasMain,
-            'sort' => $nextSort,
-        ]);
+        if ($currentPrimary) {
+            $currentPrimary->update($payload);
+
+            return;
+        }
+
+        $nextSort = (($product->images()->max('sort_order')) ?? 0) + 1;
+
+        $product->images()->create(array_merge($payload, [
+            'is_primary' => true,
+            'sort_order' => $nextSort,
+        ]));
+    }
+
+    protected function storeGalleryImage(Product $product, UploadedFile $file): void
+    {
+        $payload = $this->buildImagePayload($file);
+        $hasPrimary = $product->images()->where('is_primary', true)->exists();
+        $nextSort = (($product->images()->max('sort_order')) ?? 0) + 1;
+
+        $product->images()->create(array_merge($payload, [
+            'is_primary' => ! $hasPrimary,
+            'sort_order' => $nextSort,
+        ]));
+    }
+
+    protected function buildImagePayload(UploadedFile $file): array
+    {
+        $realPath = $file->getRealPath();
+
+        if (! $realPath || ! is_readable($realPath)) {
+            throw new \RuntimeException('Uploaded image file is not readable.');
+        }
+
+        $binary = file_get_contents($realPath);
+
+        if ($binary === false || $binary === '') {
+            throw new \RuntimeException('Uploaded image is empty or unreadable.');
+        }
+
+        return [
+            'filename' => $this->imageFileName($file),
+            'mime_type' => $file->getMimeType() ?: 'application/octet-stream',
+            'image_data' => $binary,
+        ];
     }
 
     protected function syncMainImage(Product $product, ProductRequest $request): void
@@ -322,122 +348,20 @@ class ProductController extends Controller
             $selectedId = (int) $selectedMain;
 
             if (ProductImage::where('product_id', $product->id)->where('id', $selectedId)->exists()) {
-                ProductImage::where('product_id', $product->id)->update(['is_main' => false]);
-                ProductImage::where('product_id', $product->id)->where('id', $selectedId)->update(['is_main' => true]);
+                ProductImage::where('product_id', $product->id)->update(['is_primary' => false]);
+                ProductImage::where('product_id', $product->id)->where('id', $selectedId)->update(['is_primary' => true]);
 
                 return;
             }
         }
 
-        if (! $product->images()->where('is_main', true)->exists()) {
-            $fallback = $product->images()->orderBy('sort')->first();
+        if (! $product->images()->where('is_primary', true)->exists()) {
+            $fallback = $product->images()->orderBy('sort_order')->first();
 
             if ($fallback) {
-                $fallback->update(['is_main' => true]);
+                $fallback->update(['is_primary' => true]);
             }
         }
-    }
-    protected function uploadImageToImageKit(UploadedFile $file): string
-    {
-        $rawPublicKeyEnv = (string) env('IMAGEKIT_PUBLIC_KEY');
-        $rawPrivateKeyEnv = (string) env('IMAGEKIT_PRIVATE_KEY');
-        $rawUrlEndpointEnv = (string) env('IMAGEKIT_URL_ENDPOINT');
-
-        $publicKey = trim((string) env('IMAGEKIT_PUBLIC_KEY'));
-        $privateKey = trim((string) env('IMAGEKIT_PRIVATE_KEY'));
-        $urlEndpoint = trim((string) env('IMAGEKIT_URL_ENDPOINT'));
-
-        $configPublicKey = trim((string) config('services.imagekit.public_key', ''));
-        $configPrivateKey = trim((string) config('services.imagekit.private_key', ''));
-        $configUrlEndpoint = trim((string) config('services.imagekit.url_endpoint', ''));
-
-        Log::info('ImageKit upload diagnostics before upload.', [
-            'public_key_exists' => $publicKey !== '',
-            'private_key_exists' => $privateKey !== '',
-            'url_endpoint_exists' => $urlEndpoint !== '',
-            'using_endpoint' => $urlEndpoint,
-            'public_key_has_outer_whitespace' => $publicKey !== $rawPublicKeyEnv,
-            'private_key_has_outer_whitespace' => $privateKey !== $rawPrivateKeyEnv,
-            'url_endpoint_has_outer_whitespace' => $urlEndpoint !== $rawUrlEndpointEnv,
-            'config_public_matches_env' => $configPublicKey === $publicKey,
-            'config_private_matches_env' => $configPrivateKey === $privateKey,
-            'config_endpoint_matches_env' => $configUrlEndpoint === $urlEndpoint,
-            'original_name' => $file->getClientOriginalName(),
-        ]);
-
-        if ($publicKey === '' || $privateKey === '' || $urlEndpoint === '') {
-            Log::error('ImageKit credentials are missing in runtime env.', [
-                'public_key_set' => $publicKey !== '',
-                'private_key_set' => $privateKey !== '',
-                'url_endpoint_set' => $urlEndpoint !== '',
-                'using_endpoint' => $urlEndpoint,
-            ]);
-
-            throw new \RuntimeException('ImageKit credentials are not configured.');
-        }
-
-        $imageKit = new ImageKit($publicKey, $privateKey, $urlEndpoint);
-
-        $realPath = $file->getRealPath();
-
-        if (! $realPath || ! is_readable($realPath)) {
-            Log::error('Image upload failed: uploaded file path is not readable.', [
-                'original_name' => $file->getClientOriginalName(),
-                'mime_type' => $file->getMimeType(),
-                'size' => $file->getSize(),
-                'real_path' => $realPath,
-            ]);
-
-            throw new \RuntimeException('Failed to read uploaded file before ImageKit upload.');
-        }
-
-        $fileContents = file_get_contents($realPath);
-
-        if ($fileContents === false) {
-            throw new \RuntimeException('Failed to read file for upload to ImageKit.');
-        }
-
-        $fileName = $this->imageFileName($file);
-
-        try {
-            $upload = $imageKit->upload([
-                'file' => base64_encode($fileContents),
-                'fileName' => $fileName,
-            ]);
-        } catch (\Throwable $exception) {
-            $response = method_exists($exception, 'getResponse')
-                ? $exception->getResponse()
-                : [];
-
-            Log::error('ImageKit upload threw an exception.', [
-                'message' => $exception->getMessage(),
-                'class' => get_class($exception),
-                'error' => data_get($response, 'error'),
-                'result' => data_get($response, 'result'),
-                'original_name' => $file->getClientOriginalName(),
-                'file_name' => $fileName,
-                'mime_type' => $file->getMimeType(),
-                'size' => $file->getSize(),
-            ]);
-
-            throw new \RuntimeException('ImageKit upload request failed.', previous: $exception);
-        }
-
-        $uploadedUrl = data_get($upload, 'result.url');
-
-        if (! is_string($uploadedUrl) || $uploadedUrl === '') {
-            Log::error('ImageKit upload response does not contain result.url.', [
-                'message' => data_get($upload, 'message'),
-                'error' => data_get($upload, 'error'),
-                'result' => data_get($upload, 'result'),
-                'original_name' => $file->getClientOriginalName(),
-                'file_name' => $fileName,
-            ]);
-
-            throw new \RuntimeException('ImageKit did not return uploaded image URL.');
-        }
-
-        return $uploadedUrl;
     }
 
     protected function imageFileName(UploadedFile $file): string
@@ -462,10 +386,6 @@ class ProductController extends Controller
             'has_image' => $request->hasFile('image'),
             'has_images' => $request->hasFile('images'),
             'files_keys' => array_keys($request->allFiles()),
-            'imagekit_public_key_set' => trim((string) env('IMAGEKIT_PUBLIC_KEY')) !== '',
-            'imagekit_private_key_set' => trim((string) env('IMAGEKIT_PRIVATE_KEY')) !== '',
-            'imagekit_url_endpoint_set' => trim((string) env('IMAGEKIT_URL_ENDPOINT')) !== '',
         ]);
     }
 }
-

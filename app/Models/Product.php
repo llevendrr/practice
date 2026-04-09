@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Collection;
 
 class Product extends Model
@@ -44,7 +45,34 @@ class Product extends Model
 
     public function images(): HasMany
     {
-        return $this->hasMany(ProductImage::class)->orderBy('sort');
+        return $this->hasMany(ProductImage::class)
+            ->select([
+                'id',
+                'product_id',
+                'filename',
+                'mime_type',
+                'is_primary',
+                'sort_order',
+                'created_at',
+                'updated_at',
+            ])
+            ->orderBy('sort_order');
+    }
+
+    public function primaryImage(): HasOne
+    {
+        return $this->hasOne(ProductImage::class)
+            ->select([
+                'id',
+                'product_id',
+                'filename',
+                'mime_type',
+                'is_primary',
+                'sort_order',
+                'created_at',
+                'updated_at',
+            ])
+            ->where('is_primary', true);
     }
 
     public function reviews(): HasMany
@@ -95,7 +123,7 @@ class Product extends Model
 
     public function getPrimaryImageAttribute(): ?ProductImage
     {
-        return $this->images->first(fn ($image) => $image->is_main) ?? $this->images->first();
+        return $this->images->first(fn ($image) => $image->is_primary) ?? $this->images->first();
     }
 
     public function getAverageRatingAttribute(): float

@@ -12,13 +12,23 @@ class ProductImage extends Model
 
     protected $fillable = [
         'product_id',
-        'path',
-        'is_main',
-        'sort',
+        'filename',
+        'mime_type',
+        'image_data',
+        'is_primary',
+        'sort_order',
     ];
 
     protected $casts = [
-        'is_main' => 'boolean',
+        'is_primary' => 'boolean',
+    ];
+
+    protected $appends = [
+        'public_url',
+    ];
+
+    protected $hidden = [
+        'image_data',
     ];
 
     public function product(): BelongsTo
@@ -28,6 +38,11 @@ class ProductImage extends Model
 
     public function getUrlAttribute(): string
     {
-        return (string) $this->path;
+        return $this->getPublicUrlAttribute();
+    }
+
+    public function getPublicUrlAttribute(): string
+    {
+        return route('product-images.show', $this);
     }
 }

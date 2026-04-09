@@ -52,13 +52,13 @@ class ProductSeeder extends Seeder
         ];
 
         $imagesByCategory = [
-            'smartphones' => 'https://images.unsplash.com/photo-1512499617640-c2f999087b5b?auto=format&fit=crop&w=900&q=80',
-            'laptops' => 'https://images.unsplash.com/photo-1517430816045-df4b7de11d1d?auto=format&fit=crop&w=900&q=80',
-            'gaming-laptops' => 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=900&q=80',
-            'tvs' => 'https://images.unsplash.com/photo-1508898578281-774ac4893a0c?auto=format&fit=crop&w=1000&q=80',
-            'headphones' => 'https://images.unsplash.com/photo-1459257868276-5e65389e2722?auto=format&fit=crop&w=900&q=80',
-            'vacuums' => 'https://images.unsplash.com/photo-1582719478260-99b4a171112b?auto=format&fit=crop&w=900&q=80',
-            'coffee-machines' => 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=900&q=80',
+            'smartphones' => 'smartphones',
+            'laptops' => 'laptops',
+            'gaming-laptops' => 'gaming-laptops',
+            'tvs' => 'tvs',
+            'headphones' => 'headphones',
+            'vacuums' => 'vacuums',
+            'coffee-machines' => 'coffee-machines',
         ];
 
         $productsByCategory = [
@@ -132,11 +132,21 @@ class ProductSeeder extends Seeder
             foreach ($item['images'] as $index => $imagePath) {
                 ProductImage::create([
                     'product_id' => $product->id,
-                    'path' => $imagePath,
-                    'is_main' => $index === 0,
-                    'sort' => $index,
+                    'filename' => "{$imagePath}-{$index}.png",
+                    'mime_type' => 'image/png',
+                    'image_data' => $this->placeholderPng(),
+                    'is_primary' => $index === 0,
+                    'sort_order' => $index,
                 ]);
             }
         }
+    }
+
+    private function placeholderPng(): string
+    {
+        return (string) base64_decode(
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8Xw8AAtEB9f4H6M4AAAAASUVORK5CYII=',
+            true
+        );
     }
 }

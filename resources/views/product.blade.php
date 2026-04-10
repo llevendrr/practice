@@ -22,64 +22,64 @@
             </div>
 
             <div class="product-detail__info">
-                <p class="eyebrow">TechnoDim · {{ $product->brand }}</p>
+                <p class="eyebrow">{{ __('product.meta_brand') }} � {{ $product->brand }}</p>
                 <h1>{{ $product->name }}</h1>
                 <p class="meta">{{ $product->model }}</p>
                 <div class="price">
-                    <span>{{ number_format($product->discounted_price, 0, ',', ' ') }}₴</span>
+                    <span>{{ number_format($product->discounted_price, 0, ',', ' ') }}?</span>
                     @if ($product->discount)
-                        <del>{{ number_format($product->price, 0, ',', ' ') }}₴</del>
+                        <del>{{ number_format($product->price, 0, ',', ' ') }}?</del>
                     @endif
                 </div>
                 <p class="product-detail__description">{{ $product->description }}</p>
                 <div class="product-meta">
-                    <span class="badge badge--muted">{{ $product->stock > 0 ? 'Є в наявності' : 'Під замовлення' }}</span>
-                    <span class="product-meta__label">Популярність: {{ $product->popularity }}</span>
+                    <span class="badge badge--muted">{{ $product->stock > 0 ? __('product.in_stock') : __('product.on_request') }}</span>
+                    <span class="product-meta__label">{{ __('product.popularity') }}: {{ $product->popularity }}</span>
                 </div>
                 <form action="{{ route('cart.store', $product) }}" method="post" class="product-detail__form">
                     @csrf
                     <div class="form-grid">
                         <div class="field-group">
-                            <label for="quantity">Кількість</label>
+                            <label for="quantity">{{ __('product.quantity') }}</label>
                             <input type="number" id="quantity" name="quantity" min="1" max="{{ max(1, $product->stock) }}" value="1" />
                         </div>
                     </div>
-                    <button type="submit" class="btn" {{ $product->stock < 1 ? 'disabled' : '' }}>Додати в кошик</button>
+                    <button type="submit" class="btn" {{ $product->stock < 1 ? 'disabled' : '' }}>{{ __('product.add_to_cart') }}</button>
                 </form>
             </div>
         </div>
 
         <div class="product-detail__extras">
-                <div class="feature-card">
-                    <h3>Характеристики</h3>
-                    <table class="cart-table">
-                        <tbody>
-                            @foreach ($product->specifications ?? [] as $key => $value)
-                                @php
-                                    $definition = $specDefinitions[$key] ?? null;
-                                    $label = $definition?->label ??
-                                        \Illuminate\Support\Str::of($key)->replace('_', ' ')->title();
-                                @endphp
-                                <tr>
-                                    <th>{{ $label }}</th>
-                                    <td>{{ $value }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
             <div class="feature-card">
-                <h3>Відгуки</h3>
-                <p class="stars">Середній рейтинг: {{ number_format($product->average_rating, 1) }} / 5</p>
+                <h3>{{ __('product.specifications') }}</h3>
+                <table class="cart-table">
+                    <tbody>
+                        @foreach ($product->specifications ?? [] as $key => $value)
+                            @php
+                                $definition = $specDefinitions[$key] ?? null;
+                                $label = $definition?->label ??
+                                    \Illuminate\Support\Str::of($key)->replace('_', ' ')->title();
+                            @endphp
+                            <tr>
+                                <th>{{ $label }}</th>
+                                <td>{{ $value }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            <div class="feature-card">
+                <h3>{{ __('product.reviews') }}</h3>
+                <p class="stars">{{ __('product.average_rating') }}: {{ number_format($product->average_rating, 1) }} / 5</p>
                 <div class="reviews">
                     @forelse ($product->reviews as $review)
                         <div class="review">
                             <strong>{{ $review->user->name }}</strong>
-                            <div class="stars">{{ str_repeat('★', $review->rating) }}{{ str_repeat('☆', 5 - $review->rating) }}</div>
+                            <div class="stars">{{ str_repeat('?', $review->rating) }}{{ str_repeat('?', 5 - $review->rating) }}</div>
                             <p>{{ $review->comment }}</p>
                         </div>
                     @empty
-                        <p>Поки що нема відгуків.</p>
+                        <p>{{ __('product.no_reviews') }}</p>
                     @endforelse
                 </div>
 
@@ -88,18 +88,18 @@
                         @csrf
                         <div class="form-grid">
                             <div class="field-group">
-                                <label for="rating">Рейтинг (1-5)</label>
+                                <label for="rating">{{ __('product.rating') }}</label>
                                 <input type="number" min="1" max="5" id="rating" name="rating" value="{{ old('rating', 5) }}" />
                             </div>
                             <div class="field-group">
-                                <label for="comment">Відгук</label>
+                                <label for="comment">{{ __('product.review') }}</label>
                                 <textarea id="comment" name="comment">{{ old('comment') }}</textarea>
                             </div>
                         </div>
-                        <button type="submit" class="btn">Додати відгук</button>
+                        <button type="submit" class="btn">{{ __('product.add_review') }}</button>
                     </form>
                 @else
-                    <p>Увійдіть, щоб залишити відгук.</p>
+                    <p>{{ __('product.login_to_review') }}</p>
                 @endauth
             </div>
         </div>
@@ -107,7 +107,7 @@
 
     <section class="section">
         <div class="section-heading">
-            <h2>Схожі товари</h2>
+            <h2>{{ __('product.related') }}</h2>
         </div>
         <div class="grid-cards">
             @foreach ($related as $item)
@@ -123,19 +123,19 @@
                         <h3>{{ $item->name }}</h3>
                         <p class="meta">{{ $item->brand }}</p>
                         <div class="price">
-                            <span>{{ number_format($item->discounted_price, 0, ',', ' ') }}₴</span>
+                            <span>{{ number_format($item->discounted_price, 0, ',', ' ') }}?</span>
                             @if ($item->discount)
-                                <del>{{ number_format($item->price, 0, ',', ' ') }}₴</del>
+                                <del>{{ number_format($item->price, 0, ',', ' ') }}?</del>
                             @endif
                         </div>
                     </div>
                     <div class="product-card__actions">
-                        <a href="{{ route('product.show', $item) }}" class="secondary-btn">Детальніше</a>
+                        <a href="{{ route('product.show', $item) }}" class="secondary-btn">{{ __('cart.details') }}</a>
                         <form action="{{ route('cart.store', $item) }}" method="post">
                             @csrf
                             <input type="hidden" name="quantity" value="1" />
                             <button type="submit" class="cart-btn" {{ $item->stock < 1 ? 'disabled' : '' }}>
-                                {{ $item->stock < 1 ? 'Немає в наявності' : 'У кошик' }}
+                                {{ $item->stock < 1 ? __('cart.out_of_stock') : __('cart.to_cart') }}
                             </button>
                         </form>
                     </div>

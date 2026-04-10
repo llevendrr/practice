@@ -23,14 +23,14 @@ class CartController extends Controller
     public function store(Request $request, Product $product)
     {
         if ($product->stock < 1) {
-            return back()->with('error', 'Товар тимчасово відсутній.');
+            return back()->with('error', __('messages.cart.out_of_stock'));
         }
 
         $quantity = max(1, (int) $request->input('quantity', 1));
 
         $this->cartService->add($product, $quantity);
 
-        return back()->with('status', 'Товар додано до кошика.');
+        return back()->with('status', __('messages.cart.added'));
     }
 
     public function update(Request $request, Product $product)
@@ -39,13 +39,13 @@ class CartController extends Controller
 
         $this->cartService->update($product->id, $quantity);
 
-        return back()->with('status', 'Кількість оновлено.');
+        return back()->with('status', __('messages.cart.updated'));
     }
 
     public function remove(Product $product)
     {
         $this->cartService->remove($product->id);
 
-        return back()->with('status', 'Товар видалено з кошика.');
+        return back()->with('status', __('messages.cart.removed'));
     }
 }

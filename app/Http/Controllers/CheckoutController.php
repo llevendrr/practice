@@ -15,9 +15,9 @@ class CheckoutController extends Controller
     }
 
     public const SHIPPING_RATES = [
-        'Нова пошта' => 150,
-        'Укрпошта' => 110,
-        'Самовивіз' => 0,
+        '���� �����' => 150,
+        '��������' => 110,
+        '��������' => 0,
     ];
 
     public function index()
@@ -25,7 +25,7 @@ class CheckoutController extends Controller
         $items = $this->cartService->items();
 
         if (! $items->count()) {
-            return redirect()->route('cart')->with('error', 'Кошик порожній.');
+            return redirect()->route('cart')->with('error', __('messages.checkout.empty_cart'));
         }
 
         return view('checkout', [
@@ -40,7 +40,7 @@ class CheckoutController extends Controller
         $items = $this->cartService->items();
 
         if (! $items->count()) {
-            return redirect()->route('cart')->with('error', 'Кошик порожній.');
+            return redirect()->route('cart')->with('error', __('messages.checkout.empty_cart'));
         }
 
         $shippingCost = self::SHIPPING_RATES[$request->shipping_method] ?? 0;

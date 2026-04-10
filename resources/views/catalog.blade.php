@@ -1,30 +1,30 @@
 @extends('layouts.app')
 
-@section('title', 'Каталог')
+@section('title', __('catalog.title'))
 
 @section('content')
 <section class="section catalog-section">
     <div class="container">
         <div class="section-heading">
             <div>
-                <h2>Каталог техніки</h2>
-                <p>Фільтруйте за брендом, категорією чи ціною, щоб підібрати новинку.</p>
+                <h2>{{ __('catalog.heading') }}</h2>
+                <p>{{ __('catalog.subtitle') }}</p>
             </div>
         </div>
 
         <div class="catalog-wrapper">
             <aside class="catalog-filter">
-                <h3 class="filter-heading">Фільтр</h3>
+                <h3 class="filter-heading">{{ __('catalog.filters.title') }}</h3>
                 <form action="{{ route('catalog') }}" method="get">
                     <div class="field-group">
-                        <label for="search">Пошук</label>
-                        <input id="search" name="search" type="search" value="{{ request('search') }}" placeholder="Наприклад, iPhone 15" />
+                        <label for="search">{{ __('catalog.filters.search') }}</label>
+                        <input id="search" name="search" type="search" value="{{ request('search') }}" placeholder="{{ __('catalog.filters.search_placeholder') }}" />
                     </div>
 
                     <div class="field-group">
-                        <label for="category">Категорія</label>
+                        <label for="category">{{ __('catalog.filters.category') }}</label>
                         <select name="category" id="category">
-                            <option value="">Усі категорії</option>
+                            <option value="">{{ __('catalog.filters.all_categories') }}</option>
                             @foreach ($filters['categories'] as $category)
                                 <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
                                     {{ $category->name }}
@@ -34,9 +34,9 @@
                     </div>
 
                     <div class="field-group">
-                        <label for="brand">Бренд</label>
+                        <label for="brand">{{ __('catalog.filters.brand') }}</label>
                         <select name="brand" id="brand">
-                            <option value="">Усі бренди</option>
+                            <option value="">{{ __('catalog.filters.all_brands') }}</option>
                             @foreach ($filters['brands'] as $brand)
                                 <option value="{{ $brand }}" {{ request('brand') === $brand ? 'selected' : '' }}>
                                     {{ $brand }}
@@ -46,32 +46,32 @@
                     </div>
 
                     <div class="field-group">
-                        <label>Ціна, ₴</label>
+                        <label>{{ __('catalog.filters.price') }}</label>
                         <div class="range-pair">
-                            <input name="price_min" type="number" min="0" placeholder="від" value="{{ request('price_min') }}" />
-                            <input name="price_max" type="number" min="0" placeholder="до" value="{{ request('price_max') }}" />
+                            <input name="price_min" type="number" min="0" placeholder="{{ __('catalog.filters.from') }}" value="{{ request('price_min') }}" />
+                            <input name="price_max" type="number" min="0" placeholder="{{ __('catalog.filters.to') }}" value="{{ request('price_max') }}" />
                         </div>
                     </div>
 
                     <div class="field-group">
-                        <label for="stock">Наявність</label>
+                        <label for="stock">{{ __('catalog.filters.stock') }}</label>
                         <select name="stock" id="stock">
-                            <option value="">Всі товари</option>
-                            <option value="1" {{ request('stock') ? 'selected' : '' }}>Тільки зі складу</option>
+                            <option value="">{{ __('catalog.filters.all_items') }}</option>
+                            <option value="1" {{ request('stock') ? 'selected' : '' }}>{{ __('catalog.filters.in_stock_only') }}</option>
                         </select>
                     </div>
 
                     <div class="field-group">
-                        <label for="sort">Сортування</label>
+                        <label for="sort">{{ __('catalog.filters.sort') }}</label>
                         <select name="sort" id="sort">
-                            <option value="">За новинками</option>
-                            <option value="popular" {{ request('sort') === 'popular' ? 'selected' : '' }}>Популярні</option>
-                            <option value="price_asc" {{ request('sort') === 'price_asc' ? 'selected' : '' }}>Ціна ↑</option>
-                            <option value="price_desc" {{ request('sort') === 'price_desc' ? 'selected' : '' }}>Ціна ↓</option>
+                            <option value="">{{ __('catalog.filters.newest') }}</option>
+                            <option value="popular" {{ request('sort') === 'popular' ? 'selected' : '' }}>{{ __('catalog.filters.popular') }}</option>
+                            <option value="price_asc" {{ request('sort') === 'price_asc' ? 'selected' : '' }}>{{ __('catalog.filters.price_asc') }}</option>
+                            <option value="price_desc" {{ request('sort') === 'price_desc' ? 'selected' : '' }}>{{ __('catalog.filters.price_desc') }}</option>
                         </select>
                     </div>
 
-                    <button type="submit" class="btn">Показати товари</button>
+                    <button type="submit" class="btn">{{ __('catalog.filters.submit') }}</button>
                 </form>
             </aside>
 
@@ -87,31 +87,31 @@
                                 alt="{{ $product->name }}"
                             />
                             <div>
-                        <h3>{{ $product->name }}</h3>
-                        <p class="meta">{{ $product->brand }} · {{ $product->model }}</p>
-                        @include('partials.product-rating', ['product' => $product])
+                                <h3>{{ $product->name }}</h3>
+                                <p class="meta">{{ $product->brand }} � {{ $product->model }}</p>
+                                @include('partials.product-rating', ['product' => $product])
                                 <div class="price">
-                                    <span>{{ number_format($product->discounted_price, 0, ',', ' ') }}₴</span>
+                                    <span>{{ number_format($product->discounted_price, 0, ',', ' ') }}?</span>
                                     @if ($product->discount)
-                                        <del>{{ number_format($product->price, 0, ',', ' ') }}₴</del>
+                                        <del>{{ number_format($product->price, 0, ',', ' ') }}?</del>
                                     @endif
                                 </div>
                             </div>
 
                             <div class="product-card__actions">
-                                <a href="{{ route('product.show', $product) }}" class="secondary-btn">Детальніше</a>
+                                <a href="{{ route('product.show', $product) }}" class="secondary-btn">{{ __('cart.details') }}</a>
                                 <form action="{{ route('cart.store', $product) }}" method="post">
                                     @csrf
                                     <input type="hidden" name="quantity" value="1" />
                                     <button type="submit" class="cart-btn" @if ($product->stock < 1) disabled @endif>
-                                        {{ $product->stock < 1 ? 'Немає в наявності' : 'У кошик' }}
+                                        {{ $product->stock < 1 ? __('cart.out_of_stock') : __('cart.to_cart') }}
                                     </button>
                                 </form>
                             </div>
                         </article>
                     @empty
                         <div class="product-card">
-                            <p>Нічого не знайдено за цими параметрами.</p>
+                            <p>{{ __('catalog.empty') }}</p>
                         </div>
                     @endforelse
                 </div>

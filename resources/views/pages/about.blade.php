@@ -1,47 +1,47 @@
 @extends('layouts.app')
 
-@section('title', 'Про нас')
+@section('title', __('pages.about.title'))
 
 @section('content')
     <section class="section">
         <div class="section-heading">
             <div>
-                <h2>TechnoDim — інтернет-магазин техніки</h2>
-                <p>Ми об’єднали найновіші смартфони, ноутбуки та smart-пристрої з комфортним сервісом, гарантією та релевантними пропозиціями саме для українців.</p>
+                <h2>{{ __('pages.about.heading') }}</h2>
+                <p>{{ __('pages.about.subtitle') }}</p>
             </div>
         </div>
         <div class="section-grid">
             <div class="feature-card">
-                <h3>Чесна гарантія</h3>
-                <p>Усі товари проходять технічну перевірку — гарантія 24 місяці, офіційна підтримка брендів та миттєве обслуговування у сервісному центрі.</p>
+                <h3>{{ __('pages.about.cards.warranty_title') }}</h3>
+                <p>{{ __('pages.about.cards.warranty_text') }}</p>
             </div>
             <div class="feature-card">
-                <h3>Власна команда сервісу</h3>
-                <p>Технічна підтримка відповідає на звернення 24/7, а ремонт виконується протягом 48 годин у Києві та дистанційно по всій країні.</p>
+                <h3>{{ __('pages.about.cards.service_title') }}</h3>
+                <p>{{ __('pages.about.cards.service_text') }}</p>
             </div>
             <div class="feature-card">
-                <h3>Розумна доставка</h3>
-                <p>Доставка Новою Поштою, Укрпоштою та самовивіз зі складу — відпрацьовані маршрути по всій Україні та точні терміни.</p>
+                <h3>{{ __('pages.about.cards.delivery_title') }}</h3>
+                <p>{{ __('pages.about.cards.delivery_text') }}</p>
             </div>
         </div>
     </section>
 
     <section class="section">
         <div class="section-heading">
-            <h2>Наші переваги</h2>
+            <h2>{{ __('pages.about.advantages_title') }}</h2>
         </div>
         <div class="grid-cards">
             <article class="product-card">
-                <h3>Експертний підбір</h3>
-                <p>Менеджери підбирають комплектацію та аксесуари під ваш стиль життя, відбивають гарантії брендів та описують обслуговування.</p>
+                <h3>{{ __('pages.about.advantages.expert_title') }}</h3>
+                <p>{{ __('pages.about.advantages.expert_text') }}</p>
             </article>
             <article class="product-card">
-                <h3>Сервіс без “костилів”</h3>
-                <p>Ми не “підв’язуємо” аксесуари до замовлення — лише реальні товари, чіткі ціни та прозорі умови повернення.</p>
+                <h3>{{ __('pages.about.advantages.clear_service_title') }}</h3>
+                <p>{{ __('pages.about.advantages.clear_service_text') }}</p>
             </article>
             <article class="product-card">
-                <h3>Інновації в пріоритеті</h3>
-                <p>Підтримуємо локальні бренди, тримаємо в продажу новинки та тримаємо руку на пульсі технологічних заяв.</p>
+                <h3>{{ __('pages.about.advantages.innovation_title') }}</h3>
+                <p>{{ __('pages.about.advantages.innovation_text') }}</p>
             </article>
         </div>
     </section>

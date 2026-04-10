@@ -32,21 +32,21 @@ class UserController extends Controller
 
         $user->update($data);
 
-        return redirect()->route('admin.users.index')->with('status', 'Користувача оновлено.');
+        return redirect()->route('admin.users.index')->with('status', __('messages.admin.user.updated'));
     }
 
     public function destroy(User $user): RedirectResponse
     {
         if (auth()->id() === $user->id) {
-            return redirect()->route('admin.users.index')->with('error', 'Ви не можете видалити себе.');
+            return redirect()->route('admin.users.index')->with('error', __('messages.admin.user.delete_self'));
         }
 
         if ($user->orders()->exists() || $user->reviews()->exists()) {
-            return redirect()->route('admin.users.index')->with('error', 'Користувача неможливо видалити, бо він має замовлення або відгуки.');
+            return redirect()->route('admin.users.index')->with('error', __('messages.admin.user.delete_blocked'));
         }
 
         $user->delete();
 
-        return redirect()->route('admin.users.index')->with('status', 'Користувача видалено.');
+        return redirect()->route('admin.users.index')->with('status', __('messages.admin.user.deleted'));
     }
 }

@@ -40,13 +40,13 @@ class ReviewController extends Controller
             'approved' => ! $review->approved,
         ]);
 
-        return back()->with('status', 'Статус відгуку оновлено.');
+        return back()->with('status', __('messages.reviews.status_updated'));
     }
 
     public function destroy(Review $review)
     {
         $review->delete();
 
-        return back()->with('status', 'Відгук видалено.');
+        return back()->with('status', __('messages.reviews.deleted'));
     }
 }

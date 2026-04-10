@@ -1,0 +1,29 @@
+<?php
+
+return [
+    'title' => 'Catalog',
+    'heading' => 'Electronics catalog',
+    'subtitle' => 'Filter by brand, category, or price to find your next device.',
+    'filters' => [
+        'title' => 'Filters',
+        'search' => 'Search',
+        'search_placeholder' => 'For example, iPhone 15',
+        'category' => 'Category',
+        'all_categories' => 'All categories',
+        'brand' => 'Brand',
+        'all_brands' => 'All brands',
+        'price' => 'Price, ₴',
+        'from' => 'from',
+        'to' => 'to',
+        'stock' => 'Availability',
+        'all_items' => 'All products',
+        'in_stock_only' => 'In-stock only',
+        'sort' => 'Sorting',
+        'newest' => 'Newest first',
+        'popular' => 'Popular',
+        'price_asc' => 'Price ↑',
+        'price_desc' => 'Price ↓',
+        'submit' => 'Show products',
+    ],
+    'empty' => 'No products found for these filters.',
+];

@@ -20,21 +20,21 @@ class CategorySpecFieldController extends Controller
     {
         $category->specFields()->create($request->validated());
 
-        return back()->with('status', 'Характеристику збережено.');
+        return back()->with('status', __('messages.admin.spec.saved'));
     }
 
     public function update(CategorySpecFieldRequest $request, Category $category, CategorySpecField $field)
     {
         $field->update($request->validated());
 
-        return back()->with('status', 'Характеристику оновлено.');
+        return back()->with('status', __('messages.admin.spec.updated'));
     }
 
     public function destroy(Category $category, CategorySpecField $field)
     {
         $field->delete();
 
-        return back()->with('status', 'Характеристику видалено.');
+        return back()->with('status', __('messages.admin.spec.deleted'));
     }
 
     public function api(Category $category)

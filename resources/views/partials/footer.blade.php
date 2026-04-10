@@ -1,21 +1,21 @@
 <div class="footer-grid">
     <div class="footer-grid__block">
-        <h4>Контактна інформація</h4>
-        <p>вул. Грешатика, 20, Київ</p>
+        <h4>{{ __('footer.contacts') }}</h4>
+        <p>{{ __('footer.address') }}</p>
         <p>+38 (044) 555-33-77</p>
         <p>support@technodim.local</p>
     </div>
     <div class="footer-grid__block">
-        <h4>Соцмережі</h4>
+        <h4>{{ __('footer.social') }}</h4>
         <div class="taglist">
             <span>Instagram</span>
             <span>Telegram</span>
-            <span>Youtube</span>
+            <span>YouTube</span>
         </div>
     </div>
     <div class="footer-grid__block">
-        <h4>Оплата й доставка</h4>
-        <p>Приймаємо картки Visa/Mastercard, Apple Pay, Google Pay.</p>
-        <p>Доставка Новою поштою та самовивіз зі складу.</p>
+        <h4>{{ __('footer.payment_delivery') }}</h4>
+        <p>{{ __('footer.payment_text') }}</p>
+        <p>{{ __('footer.delivery_text') }}</p>
     </div>
 </div>

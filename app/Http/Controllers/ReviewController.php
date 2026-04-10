@@ -16,6 +16,6 @@ class ReviewController extends Controller
             'approved' => true,
         ]);
 
-        return back()->with('status', 'Дякуємо за відгук! Ми опрацюємо його найближчим часом.');
+        return back()->with('status', __('messages.reviews.thanks'));
     }
 }

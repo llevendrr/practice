@@ -1,0 +1,41 @@
+<?php
+
+return [
+    'login' => [
+        'title' => 'Sign in',
+        'eyebrow' => 'Account sign in',
+        'heading' => 'Welcome back',
+        'subtitle' => 'Sign in to view your order history and personal offers.',
+        'password' => 'Password',
+        'remember' => 'Remember me',
+        'forgot' => 'Forgot password?',
+        'submit' => 'Sign in',
+    ],
+    'register' => [
+        'title' => 'Sign up',
+        'eyebrow' => 'Registration',
+        'heading' => 'Start with TechnoDim',
+        'subtitle' => 'Create an account to save orders and get bonuses.',
+        'name' => 'Name',
+        'email' => 'Email',
+        'phone' => 'Phone',
+        'password' => 'Password',
+        'password_confirmation' => 'Confirm password',
+        'submit' => 'Create account',
+    ],
+    'passwords' => [
+        'request_title' => 'Password recovery',
+        'request_heading' => 'Password recovery',
+        'request_subtitle' => 'Enter the email you use at TechnoDim, and we will send a secure password reset link.',
+        'request_note' => 'We will send a link valid for 60 minutes.',
+        'request_submit' => 'Send email',
+        'request_footer' => 'Check your spam folder. If you did not receive an email, try again or contact support.',
+        'reset_title' => 'Reset password',
+        'reset_heading' => 'Reset password',
+        'reset_subtitle' => 'Enter a new password to restore account access. Keep it strong: at least 8 characters.',
+        'new_password' => 'New password',
+        'confirm_password' => 'Confirm password',
+        'reset_note' => 'After password change, your previous password will stop working.',
+        'reset_submit' => 'Save password',
+    ],
+];

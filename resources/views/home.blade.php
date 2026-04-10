@@ -1,34 +1,34 @@
 @extends('layouts.app')
 
-@section('title', 'Головна')
+@section('title', __('home.title'))
 
 @section('content')
     <section class="hero hero--primary">
         <div class="hero__content">
-            <p class="eyebrow">TechnoDim · інтернет-магазин техніки з душею</p>
-            <h1>Готові доставити офіційні гаджети у кожне місто України</h1>
-            <p>Офіційна гарантія, експертні консультації та швидка доставка — все, що вам потрібно, щоб купити техніку без компромісів.</p>
+            <p class="eyebrow">{{ __('home.hero.eyebrow') }}</p>
+            <h1>{{ __('home.hero.title') }}</h1>
+            <p>{{ __('home.hero.description') }}</p>
             <div class="hero-actions">
-                <a href="{{ route('catalog') }}" class="btn hero-action-btn">Переглянути каталог</a>
-                <a href="{{ route('delivery') }}" class="secondary-btn hero-delivery-btn hero-action-btn">Доставка та оплата</a>
+                <a href="{{ route('catalog') }}" class="btn hero-action-btn">{{ __('home.hero.catalog_cta') }}</a>
+                <a href="{{ route('delivery') }}" class="secondary-btn hero-delivery-btn hero-action-btn">{{ __('home.hero.delivery_cta') }}</a>
             </div>
             <div class="hero-flag">
-                <span>Гарантія 24 місяці · Техпідтримка 24/7 · Безпечні повернення</span>
+                <span>{{ __('home.hero.flag') }}</span>
             </div>
         </div>
         <div class="hero__media">
             <div class="hero-card">
-                <span class="hero-card__badge">Офіційний продавець</span>
-                <p>Закуповуємо техніку напряму від брендів, тому гарантуємо сертифіковані моделі з повною сервісною підтримкою.</p>
+                <span class="hero-card__badge">{{ __('home.seller.badge') }}</span>
+                <p>{{ __('home.seller.description') }}</p>
                 <ul class="hero-card__list">
-                    <li>🛡️ Гарантія до 24 місяців</li>
-                    <li>⚡ Доставка наступного дня по Україні</li>
-                    <li>💬 Підтримка 24/7 у чаті та на телефоні</li>
+                    <li>??? {{ __('home.seller.point_1') }}</li>
+                    <li>? {{ __('home.seller.point_2') }}</li>
+                    <li>?? {{ __('home.seller.point_3') }}</li>
                 </ul>
                 <div class="hero-card__stats">
-                    <span>1000+ товарів</span>
-                    <span>24/7 підтримка</span>
-                    <span>99,8% доставлено вчасно</span>
+                    <span>{{ __('home.seller.stat_products') }}</span>
+                    <span>{{ __('home.seller.stat_support') }}</span>
+                    <span>{{ __('home.seller.stat_delivery') }}</span>
                 </div>
             </div>
         </div>
@@ -37,10 +37,10 @@
     <section class="section">
         <div class="section-heading">
             <div>
-                <h2>Новинки</h2>
-                <p>Партії перевірені, гарантія — офіційна, опис — чесний.</p>
+                <h2>{{ __('home.new.title') }}</h2>
+                <p>{{ __('home.new.subtitle') }}</p>
             </div>
-            <a href="{{ route('catalog') }}">Всі новинки →</a>
+            <a href="{{ route('catalog') }}">{{ __('home.new.link') }}</a>
         </div>
         <div class="grid-cards">
             @foreach ($newProducts as $product)
@@ -54,23 +54,22 @@
                     />
                     <div>
                         <h3>{{ $product->name }}</h3>
-                        <p class="meta">{{ $product->brand }} · {{ $product->model }}</p>
-                        @include('partials.product-rating', ['product' => $product])
+                        <p class="meta">{{ $product->brand }} � {{ $product->model }}</p>
                         @include('partials.product-rating', ['product' => $product])
                         <div class="price">
-                            <span>{{ number_format($product->discounted_price, 0, ',', ' ') }}₴</span>
+                            <span>{{ number_format($product->discounted_price, 0, ',', ' ') }}?</span>
                             @if ($product->discount)
-                                <del>{{ number_format($product->price, 0, ',', ' ') }}₴</del>
+                                <del>{{ number_format($product->price, 0, ',', ' ') }}?</del>
                             @endif
                         </div>
                     </div>
                     <div class="product-card__actions">
-                        <a href="{{ route('product.show', $product) }}" class="secondary-btn">Детальніше</a>
+                        <a href="{{ route('product.show', $product) }}" class="secondary-btn">{{ __('cart.details') }}</a>
                         <form action="{{ route('cart.store', $product) }}" method="post">
                             @csrf
                             <input type="hidden" name="quantity" value="1" />
                             <button type="submit" class="cart-btn" {{ $product->stock < 1 ? 'disabled' : '' }}>
-                                {{ $product->stock < 1 ? 'Немає в наявності' : 'У кошик' }}
+                                {{ $product->stock < 1 ? __('cart.out_of_stock') : __('cart.to_cart') }}
                             </button>
                         </form>
                     </div>
@@ -82,10 +81,10 @@
     <section class="section">
         <div class="section-heading">
             <div>
-                <h2>Хіти продажів</h2>
-                <p>Вибір, який любить спільнота — ми підбираємо лише перевірені позиції.</p>
+                <h2>{{ __('home.hits.title') }}</h2>
+                <p>{{ __('home.hits.subtitle') }}</p>
             </div>
-            <a href="{{ route('catalog') }}">Детальніше →</a>
+            <a href="{{ route('catalog') }}">{{ __('home.hits.link') }}</a>
         </div>
         <div class="grid-cards">
             @foreach ($hitProducts as $product)
@@ -96,21 +95,21 @@
                     <img src="{{ $product->primaryImage?->url ?? 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=900&q=80' }}" alt="{{ $product->name }}" />
                     <div>
                         <h3>{{ $product->name }}</h3>
-                        <p class="meta">{{ $product->brand }} · {{ $product->model }}</p>
+                        <p class="meta">{{ $product->brand }} � {{ $product->model }}</p>
                         <div class="price">
-                            <span>{{ number_format($product->discounted_price, 0, ',', ' ') }}₴</span>
+                            <span>{{ number_format($product->discounted_price, 0, ',', ' ') }}?</span>
                             @if ($product->discount)
-                                <del>{{ number_format($product->price, 0, ',', ' ') }}₴</del>
+                                <del>{{ number_format($product->price, 0, ',', ' ') }}?</del>
                             @endif
                         </div>
                     </div>
                     <div class="product-card__actions">
-                        <a href="{{ route('product.show', $product) }}" class="secondary-btn">Детальніше</a>
+                        <a href="{{ route('product.show', $product) }}" class="secondary-btn">{{ __('cart.details') }}</a>
                         <form action="{{ route('cart.store', $product) }}" method="post">
                             @csrf
                             <input type="hidden" name="quantity" value="1" />
                             <button type="submit" class="cart-btn" {{ $product->stock < 1 ? 'disabled' : '' }}>
-                                {{ $product->stock < 1 ? 'Немає в наявності' : 'У кошик' }}
+                                {{ $product->stock < 1 ? __('cart.out_of_stock') : __('cart.to_cart') }}
                             </button>
                         </form>
                     </div>
@@ -122,8 +121,8 @@
     <section class="section section--highlighted">
         <div class="section-heading">
             <div>
-                <h2>Чому TechnoDim</h2>
-                <p>Потужна техніка, що підкріплена підтримкою та чесною командою.</p>
+                <h2>{{ __('home.why.title') }}</h2>
+                <p>{{ __('home.why.subtitle') }}</p>
             </div>
         </div>
         <div class="why-grid">

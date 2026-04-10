@@ -1,35 +1,35 @@
 @extends('layouts.app')
 
-@section('title', 'Оплата замовлення')
+@section('title', __('payment.form.title'))
 
 @section('content')
     <section class="section">
         <div class="section-heading">
-            <h2>Оплата замовлення {{ $order->order_number }}</h2>
-            <p>Платіж безпечно обробляється на сервері. Ми ніколи не зберігаємо номер картки або CVV.</p>
+            <h2>{{ __('payment.form.heading', ['order' => $order->order_number]) }}</h2>
+            <p>{{ __('payment.form.subtitle') }}</p>
         </div>
 
         <div class="section-grid">
             <div class="product-card">
-                <h3>Дані замовлення</h3>
-                <p>Клієнт: {{ $order->name }}</p>
+                <h3>{{ __('payment.form.order_data') }}</h3>
+                <p>{{ __('payment.form.customer') }}: {{ $order->name }}</p>
                 <p>Email: {{ $order->email }}</p>
-                <p>Метод доставки: {{ $order->shipping_method }}</p>
+                <p>{{ __('payment.form.delivery_method') }}: {{ $order->shipping_method }}</p>
                 @if ($order->postal_code)
-                    <p>Індекс: {{ $order->postal_code }}</p>
+                    <p>{{ __('payment.form.postal_code') }}: {{ $order->postal_code }}</p>
                 @endif
-                <p>Статус: <strong>{{ $order->status_label }}</strong></p>
-                <p class="muted-note">Сума: <strong>{{ number_format($order->total, 0, ',', ' ') }} грн</strong></p>
+                <p>{{ __('payment.form.status') }}: <strong>{{ $order->status_label }}</strong></p>
+                <p class="muted-note">{{ __('payment.form.amount') }}: <strong>{{ number_format($order->total, 0, ',', ' ') }} ���</strong></p>
             </div>
 
             <div class="product-card">
-                <h3>Оплатити карткою</h3>
+                <h3>{{ __('payment.form.pay_card') }}</h3>
                 <form id="card-payment-form" method="post" action="{{ route('payment.card.process', $order) }}">
                     @csrf
 
                     <div class="form-grid">
                         <div class="field-group">
-                            <label for="card_number">Номер картки</label>
+                            <label for="card_number">{{ __('payment.form.card_number') }}</label>
                             <input
                                 id="card_number"
                                 name="card_number"
@@ -47,7 +47,7 @@
                         </div>
 
                         <div class="field-group">
-                            <label for="cardholder_name">Ім'я власника</label>
+                            <label for="cardholder_name">{{ __('payment.form.cardholder') }}</label>
                             <input
                                 id="cardholder_name"
                                 name="cardholder_name"
@@ -61,7 +61,7 @@
                         </div>
 
                         <div class="field-group">
-                            <label for="exp_month">Термін дії (MM)</label>
+                            <label for="exp_month">{{ __('payment.form.exp_month') }}</label>
                             <input
                                 id="exp_month"
                                 name="exp_month"
@@ -78,7 +78,7 @@
                         </div>
 
                         <div class="field-group">
-                            <label for="exp_year">Термін дії (YYYY)</label>
+                            <label for="exp_year">{{ __('payment.form.exp_year') }}</label>
                             <input
                                 id="exp_year"
                                 name="exp_year"
@@ -95,14 +95,14 @@
                         </div>
 
                         <div class="field-group">
-                            <label for="cvv">CVV</label>
+                            <label for="cvv">{{ __('payment.form.cvv') }}</label>
                             <input
                                 id="cvv"
                                 name="cvv"
                                 type="password"
                                 inputmode="numeric"
                                 maxlength="4"
-                                placeholder="•••"
+                                placeholder="���"
                                 value="{{ old('cvv') }}"
                                 data-credit-mask="cvv"
                             />
@@ -113,10 +113,10 @@
                     </div>
 
                     <div class="form-actions">
-                        <p class="muted-note">Після натискання "Оплатити" кнопка блокується, поки ми обробляємо платіж.</p>
+                        <p class="muted-note">{{ __('payment.form.submit_note') }}</p>
                     </div>
 
-                    <button class="btn" type="submit" data-processing-text="Обробка...">Оплатити</button>
+                    <button class="btn" type="submit" data-processing-text="{{ __('payment.form.processing') }}">{{ __('payment.form.submit') }}</button>
                 </form>
             </div>
         </div>
@@ -136,7 +136,7 @@
                 return;
             }
 
-            const processingText = submitButton.dataset.processingText || 'Обробка...';
+            const processingText = submitButton.dataset.processingText || '{{ __('payment.form.processing') }}';
 
             form.addEventListener('submit', () => {
                 if (submitButton.disabled) {

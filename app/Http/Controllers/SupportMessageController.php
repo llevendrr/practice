@@ -25,6 +25,6 @@ class SupportMessageController extends Controller
             $supportThread->update(['status' => SupportThread::STATUS_OPEN]);
         }
 
-        return redirect()->route('support.show', $supportThread)->with('status', 'Повідомлення надіслано.');
+        return redirect()->route('support.show', $supportThread)->with('status', __('messages.support.message_sent'));
     }
 }

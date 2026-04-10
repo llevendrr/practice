@@ -29,7 +29,7 @@ class ProfileController extends Controller
     {
         auth()->user()->update($request->validated());
 
-        return back()->with('status', 'Профіль оновлено.');
+        return back()->with('status', __('messages.profile.updated'));
     }
 
     public function updatePassword(ProfilePasswordRequest $request)
@@ -38,6 +38,6 @@ class ProfileController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        return back()->with('status', 'Пароль змінено.');
+        return back()->with('status', __('messages.profile.password_updated'));
     }
 }

@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Вхід')
+@section('title', __('auth.login.title'))
 
 @section('content')
 <section class="auth-page">
     <div class="auth-card">
-        <p class="eyebrow">Вхід до акаунту</p>
-        <h1>Ласкаво просимо</h1>
-        <p class="auth-subtitle">Авторизуйтесь, щоб переглянути історію замовлень і персональні пропозиції.</p>
+        <p class="eyebrow">{{ __('auth.login.eyebrow') }}</p>
+        <h1>{{ __('auth.login.heading') }}</h1>
+        <p class="auth-subtitle">{{ __('auth.login.subtitle') }}</p>
 
         <form action="{{ route('login.attempt') }}" method="post">
             @csrf
@@ -21,7 +21,7 @@
                 </div>
 
                 <div class="field-group">
-                    <label for="password">Пароль</label>
+                    <label for="password">{{ __('auth.login.password') }}</label>
                     <input id="password" name="password" type="password" required minlength="8" autocomplete="current-password" />
                     @error('password')
                         <span class="error-text">{{ $message }}</span>
@@ -35,12 +35,12 @@
             <div class="form-actions">
                 <label>
                     <input type="checkbox" name="remember" {{ old('remember') ? 'checked' : '' }} />
-                    Запам’ятати мене
+                    {{ __('auth.login.remember') }}
                 </label>
-                <a href="{{ route('password.request') }}">Забули пароль?</a>
+                <a href="{{ route('password.request') }}">{{ __('auth.login.forgot') }}</a>
             </div>
 
-            <button class="btn auth-btn" type="submit">Увійти</button>
+            <button class="btn auth-btn" type="submit">{{ __('auth.login.submit') }}</button>
         </form>
     </div>
 </section>

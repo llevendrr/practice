@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Відновлення пароля')
+@section('title', __('auth.passwords.request_title'))
 
 @section('content')
     <section class="auth-page">
         <div class="auth-card">
-            <h1>Відновлення пароля</h1>
+            <h1>{{ __('auth.passwords.request_heading') }}</h1>
             <p class="auth-subtitle">
-                Вкажіть email, який ви використовуєте в TechnoDim, і ми надішлемо безпечне посилання для зміни пароля.
+                {{ __('auth.passwords.request_subtitle') }}
             </p>
 
             <form method="post" action="{{ route('password.email') }}">
@@ -24,14 +24,14 @@
                 </div>
 
                 <div class="form-actions">
-                    <p class="muted-note">Ми надішлемо посилання, яке дійсне протягом 60 хвилин.</p>
+                    <p class="muted-note">{{ __('auth.passwords.request_note') }}</p>
                 </div>
 
-                <button class="btn" type="submit">Надіслати лист</button>
+                <button class="btn" type="submit">{{ __('auth.passwords.request_submit') }}</button>
             </form>
 
             <p class="muted-note">
-                Перевіряйте папку «Спам», а якщо лист не прийшов — спробуйте ще раз або напишіть до підтримки через форму.
+                {{ __('auth.passwords.request_footer') }}
             </p>
         </div>
     </section>

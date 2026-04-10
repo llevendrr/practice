@@ -49,7 +49,7 @@ class SupportController extends Controller
             $supportThread->update(['status' => SupportThread::STATUS_OPEN]);
         }
 
-        return back()->with('status', 'Відповідь надіслано.');
+        return back()->with('status', __('messages.support.reply_sent'));
     }
 
     public function updateStatus(Request $request, SupportThread $supportThread)
@@ -60,6 +60,6 @@ class SupportController extends Controller
 
         $supportThread->update(['status' => $validated['status']]);
 
-        return back()->with('status', 'Статус оновлено.');
+        return back()->with('status', __('messages.support.status_updated'));
     }
 }

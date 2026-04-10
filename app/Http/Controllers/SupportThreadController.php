@@ -59,6 +59,6 @@ class SupportThreadController extends Controller
             'user_id' => auth()->id(),
         ]);
 
-        return redirect()->route('support.show', $thread)->with('status', 'Звернення створено.');
+        return redirect()->route('support.show', $thread)->with('status', __('messages.support.thread_created'));
     }
 }

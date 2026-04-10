@@ -1,25 +1,25 @@
 @extends('layouts.app')
 
-@section('title', 'Оплата успішно виконана')
+@section('title', __('payment.success.title'))
 
 @section('content')
     <section class="section">
         <div class="section-heading">
-            <h2>Оплату успішно виконано</h2>
-            <p>Дякуємо! Ми отримали оплату для замовлення {{ $order->order_number }}.</p>
+            <h2>{{ __('payment.success.heading') }}</h2>
+            <p>{{ __('payment.success.subtitle', ['order' => $order->order_number]) }}</p>
         </div>
 
         <div class="product-card">
-            <p>Номер замовлення: <strong>{{ $order->order_number }}</strong></p>
-            <p>Сума: <strong>{{ number_format($order->total, 0, ',', ' ') }} грн</strong></p>
+            <p>{{ __('payment.success.order_number') }}: <strong>{{ $order->order_number }}</strong></p>
+            <p>{{ __('payment.success.amount') }}: <strong>{{ number_format($order->total, 0, ',', ' ') }} ���</strong></p>
             @if ($order->payment_reference)
-                <p>Референс транзакції: <strong>{{ $order->payment_reference }}</strong></p>
+                <p>{{ __('payment.success.reference') }}: <strong>{{ $order->payment_reference }}</strong></p>
             @endif
-            <p>Дата оплати: <strong>{{ $order->paid_at ? $order->paid_at->format('d.m.Y H:i') : '—' }}</strong></p>
+            <p>{{ __('payment.success.paid_at') }}: <strong>{{ $order->paid_at ? $order->paid_at->format('d.m.Y H:i') : '�' }}</strong></p>
 
             <div class="form-actions">
-                <a class="btn" href="{{ route('orders') }}">Перейти до профілю / Мої замовлення</a>
-                <a class="secondary-btn" href="{{ route('home') }}">На головну</a>
+                <a class="btn" href="{{ route('orders') }}">{{ __('payment.success.to_orders') }}</a>
+                <a class="secondary-btn" href="{{ route('home') }}">{{ __('payment.success.to_home') }}</a>
             </div>
         </div>
     </section>

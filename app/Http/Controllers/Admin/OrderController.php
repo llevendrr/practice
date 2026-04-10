@@ -35,7 +35,7 @@ class OrderController extends Controller
 
         $order->update($data);
 
-        return back()->with('status', 'Статуси оновлено.');
+        return back()->with('status', __('messages.admin.order.statuses_updated'));
     }
 
     public function create()
@@ -53,7 +53,7 @@ class OrderController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email',
             'phone' => ['required', 'regex:/^\d{9,15}$/'],
-            'shipping_method' => 'required|in:Нова пошта,Укрпошта,Самовивіз',
+            'shipping_method' => 'required|in:���� �����,��������,��������',
             'shipping_cost' => 'required|numeric|min:0',
             'payment_status' => 'required|in:pending,paid',
             'status' => 'required|in:new,processing,shipped,done,canceled',
@@ -109,6 +109,6 @@ class OrderController extends Controller
             'total' => $subtotal + $data['shipping_cost'],
         ]);
 
-        return redirect()->route('admin.orders.index')->with('status', 'Замовлення створено.');
+        return redirect()->route('admin.orders.index')->with('status', __('messages.orders.created'));
     }
 }

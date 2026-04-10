@@ -26,7 +26,7 @@ class CategoryController extends Controller
     {
         Category::create($request->validated());
 
-        return redirect()->route('admin.categories.index')->with('status', 'Категорію збережено.');
+        return redirect()->route('admin.categories.index')->with('status', __('messages.admin.category.saved'));
     }
 
     public function edit(Category $category)
@@ -39,18 +39,18 @@ class CategoryController extends Controller
     public function update(CategoryRequest $request, Category $category)
     {
         if ($request->parent_id === $category->id) {
-            return back()->with('error', 'Категорія не може бути власним батьком.');
+            return back()->with('error', __('messages.admin.category.self_parent'));
         }
 
         $category->update($request->validated());
 
-        return redirect()->route('admin.categories.index')->with('status', 'Категорію оновлено.');
+        return redirect()->route('admin.categories.index')->with('status', __('messages.admin.category.updated'));
     }
 
     public function destroy(Category $category)
     {
         $category->delete();
 
-        return back()->with('status', 'Категорію видалено.');
+        return back()->with('status', __('messages.admin.category.deleted'));
     }
 }

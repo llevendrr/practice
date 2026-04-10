@@ -3,26 +3,52 @@ import './bootstrap';
 const themeStorageKey = 'technodim-theme';
 const locale = document.documentElement.lang.startsWith('uk') ? 'uk' : 'en';
 
-const getActiveTheme = () => (document.documentElement.classList.contains('light') ? 'light' : 'dark');
-
-const updateThemeControls = (mode) => {
-    const dictionary = {
-        uk: {
-            light: 'Ð¡Ð²Ñ–Ñ‚Ð»Ð° Ñ‚ÐµÐ¼Ð°',
-            dark: 'Ð¢ÐµÐ¼Ð½Ð° Ñ‚ÐµÐ¼Ð°',
-            ariaPrefix: 'ÐŸÐ¾Ñ‚Ð¾Ñ‡Ð½Ð° Ñ‚ÐµÐ¼Ð°:',
-            ariaAction: 'ÐÐ°Ñ‚Ð¸ÑÐ½Ñ–Ñ‚ÑŒ, Ñ‰Ð¾Ð± Ð¿ÐµÑ€ÐµÐºÐ»ÑŽÑ‡Ð¸Ñ‚Ð¸.',
+const i18n = {
+    uk: {
+        theme: {
+            light: 'Ñâ³òëà òåìà',
+            dark: 'Òåìíà òåìà',
+            ariaPrefix: 'Ïîòî÷íà òåìà:',
+            ariaAction: 'Íàòèñí³òü, ùîá ïåðåìêíóòè.',
         },
-        en: {
+        spec: {
+            enterPrefix: 'Âêàæ³òü',
+            choosePrefix: 'Âèáåð³òü',
+            prompt: 'Ñïî÷àòêó îáåð³òü êàòåãîð³þ, ùîá ïîáà÷èòè íàá³ð õàðàêòåðèñòèê.',
+            empty: 'Äëÿ ö³º¿ êàòåãîð³¿ íå çàäàíî õàðàêòåðèñòèê.',
+            loading: 'Çàâàíòàæåííÿ õàðàêòåðèñòèê…',
+            loadError: 'Íå âäàëîñÿ çàâàíòàæèòè õàðàêòåðèñòèêè. Ñïðîáóéòå ùå ðàç.',
+            loadErrorAlert: 'Íå âäàëîñÿ çàâàíòàæèòè õàðàêòåðèñòèêè. Ïåðåâ³ðòå ³íòåðíåò-ç?ºäíàííÿ àáî ñïðîáóéòå çíîâó.',
+        },
+    },
+    en: {
+        theme: {
             light: 'Light theme',
             dark: 'Dark theme',
             ariaPrefix: 'Current theme:',
             ariaAction: 'Press to toggle.',
         },
-    };
-    const labels = dictionary[locale];
+        spec: {
+            enterPrefix: 'Enter',
+            choosePrefix: 'Choose',
+            prompt: 'Select a category first to see specification fields.',
+            empty: 'No specification fields are configured for this category.',
+            loading: 'Loading specification fields…',
+            loadError: 'Failed to load specification fields. Please try again.',
+            loadErrorAlert: 'Failed to load specification fields. Check your connection and try again.',
+        },
+    },
+};
+
+const t = i18n[locale] ?? i18n.en;
+
+const getActiveTheme = () => (document.documentElement.classList.contains('light') ? 'light' : 'dark');
+
+const updateThemeControls = (mode) => {
+    const labels = t.theme;
     const label = mode === 'light' ? labels.light : labels.dark;
     const icon = mode === 'light' ? '\u2600\uFE0F' : '\uD83C\uDF19';
+
     document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
         button.textContent = `${icon} ${label}`;
         button.setAttribute('aria-label', `${labels.ariaPrefix} ${label}. ${labels.ariaAction}`);
@@ -65,8 +91,8 @@ const renderInputForField = (field, value) => {
     const rawLabel = String(field.label ?? '');
     const label = escapeHtml(rawLabel);
     const lowerLabel = escapeHtml(rawLabel.toLowerCase());
-    const textPlaceholder = `Ð â€™Ð Ñ”Ð Â°Ð Â¶Ð¡â€“Ð¡â€šÐ¡ÐŠ ${label}`;
-    const selectPlaceholder = `Ð â€™Ð Ñ‘Ð Â±Ð ÂµÐ¡Ð‚Ð¡â€“Ð¡â€šÐ¡ÐŠ ${lowerLabel}`;
+    const textPlaceholder = `${t.spec.enterPrefix} ${label}`;
+    const selectPlaceholder = `${t.spec.choosePrefix} ${lowerLabel}`;
 
     if (field.field_type === 'number') {
         return `
@@ -174,7 +200,6 @@ const setupCreditCardMasks = () => {
 const installListeners = () => {
     const searchToggle = document.querySelector('[data-search-toggle]');
     const searchBox = document.querySelector('[data-site-search]');
-    console.debug('Spec sync: init started');
 
     if (searchToggle && searchBox) {
         searchToggle.addEventListener('click', () => {
@@ -189,16 +214,13 @@ const installListeners = () => {
     if (specSelect && specContainer) {
         const specUrlTemplate = specSelect.dataset.specUrl;
         const specHint = document.querySelector('[data-spec-hint]');
-        const promptMessage = 'Ð ÐŽÐ Ñ—Ð Ñ•Ð¡â€¡Ð Â°Ð¡â€šÐ Ñ”Ð¡Ñ“ Ð Ñ•Ð Â±Ð ÂµÐ¡Ð‚Ð¡â€“Ð¡â€šÐ¡ÐŠ Ð Ñ”Ð Â°Ð¡â€šÐ ÂµÐ Ñ–Ð Ñ•Ð¡Ð‚Ð¡â€“Ð¡Ð‹, Ð¡â€°Ð Ñ•Ð Â± Ð Ñ—Ð Ñ•Ð Â±Ð Â°Ð¡â€¡Ð Ñ‘Ð¡â€šÐ Ñ‘ Ð Ð…Ð Â°Ð Â±Ð¡â€“Ð¡Ð‚ Ð¡â€¦Ð Â°Ð¡Ð‚Ð Â°Ð Ñ”Ð¡â€šÐ ÂµÐ¡Ð‚Ð Ñ‘Ð¡ÐƒÐ¡â€šÐ Ñ‘Ð Ñ”.';
-        const emptyMessage = 'Ð â€Ð Â»Ð¡Ð Ð¡â€ Ð¡â€“Ð¡â€Ð¡â€” Ð Ñ”Ð Â°Ð¡â€šÐ ÂµÐ Ñ–Ð Ñ•Ð¡Ð‚Ð¡â€“Ð¡â€” Ð Ð…Ð Âµ Ð Â·Ð Â°Ð Ò‘Ð Â°Ð Ð…Ð Ñ• Ð¡â€¦Ð Â°Ð¡Ð‚Ð Â°Ð Ñ”Ð¡â€šÐ ÂµÐ¡Ð‚Ð Ñ‘Ð¡ÐƒÐ¡â€šÐ Ñ‘Ð Ñ”.';
-        const loadingMessage = 'Ð â€”Ð Â°Ð Ð†Ð Â°Ð Ð…Ð¡â€šÐ Â°Ð Â¶Ð ÂµÐ Ð…Ð Ð…Ð¡Ð Ð¡â€¦Ð Â°Ð¡Ð‚Ð Â°Ð Ñ”Ð¡â€šÐ ÂµÐ¡Ð‚Ð Ñ‘Ð¡ÐƒÐ¡â€šÐ Ñ‘Ð Ñ”Ð²Ð‚Â¦';
 
         const renderMessage = (message) => {
             specContainer.innerHTML = `<p class="muted-note">${message}</p>`;
         };
 
         const showLoadingMessage = () => {
-            renderMessage(loadingMessage);
+            renderMessage(t.spec.loading);
         };
 
         const parseStoredValues = () => {
@@ -239,7 +261,7 @@ const installListeners = () => {
             const active = hasCategory();
 
             if (!specUrlTemplate || !active) {
-                renderMessage(promptMessage);
+                renderMessage(t.spec.prompt);
                 refreshSpecState();
                 return;
             }
@@ -264,7 +286,7 @@ const installListeners = () => {
                 const fields = await response.json();
 
                 if (!fields.length) {
-                    renderMessage(emptyMessage);
+                    renderMessage(t.spec.empty);
                     return;
                 }
 
@@ -278,8 +300,8 @@ const installListeners = () => {
                     .join('');
             } catch (error) {
                 console.error('Spec sync: failed to load fields', error);
-                renderMessage('Ð ÑœÐ Âµ Ð Ð†Ð Ò‘Ð Â°Ð Â»Ð Ñ•Ð¡ÐƒÐ¡Ð Ð Â·Ð Â°Ð Ð†Ð Â°Ð Ð…Ð¡â€šÐ Â°Ð Â¶Ð Ñ‘Ð¡â€šÐ Ñ‘ Ð¡â€¦Ð Â°Ð¡Ð‚Ð Â°Ð Ñ”Ð¡â€šÐ ÂµÐ¡Ð‚Ð Ñ‘Ð¡ÐƒÐ¡â€šÐ Ñ‘Ð Ñ”Ð Ñ‘. Ð ÐŽÐ Ñ—Ð¡Ð‚Ð Ñ•Ð Â±Ð¡Ñ“Ð â„–Ð¡â€šÐ Âµ Ð¡â€°Ð Âµ Ð¡Ð‚Ð Â°Ð Â·.');
-                alert('Ð ÑœÐ Âµ Ð Ð†Ð Ò‘Ð Â°Ð Â»Ð Ñ•Ð¡ÐƒÐ¡Ð Ð Â·Ð Â°Ð Ð†Ð Â°Ð Ð…Ð¡â€šÐ Â°Ð Â¶Ð Ñ‘Ð¡â€šÐ Ñ‘ Ð¡â€¦Ð Â°Ð¡Ð‚Ð Â°Ð Ñ”Ð¡â€šÐ ÂµÐ¡Ð‚Ð Ñ‘Ð¡ÐƒÐ¡â€šÐ Ñ‘Ð Ñ”Ð Ñ‘. Ð ÑŸÐ ÂµÐ¡Ð‚Ð ÂµÐ Ð†Ð¡â€“Ð¡Ð‚Ð¡â€šÐ Âµ Ð¡â€“Ð Ð…Ð¡â€šÐ ÂµÐ¡Ð‚Ð Ð…Ð ÂµÐ¡â€š-Ð Â·Ð²Ð‚â„¢Ð¡â€Ð Ò‘Ð Ð…Ð Â°Ð Ð…Ð Ð…Ð¡Ð Ð Â°Ð Â±Ð Ñ• Ð¡ÐƒÐ Ñ—Ð¡Ð‚Ð Ñ•Ð Â±Ð¡Ñ“Ð â„–Ð¡â€šÐ Âµ Ð Â·Ð Ð…Ð Ñ•Ð Ð†Ð¡Ñ“.');
+                renderMessage(t.spec.loadError);
+                alert(t.spec.loadErrorAlert);
             } finally {
                 refreshSpecState();
             }
@@ -329,4 +351,3 @@ const installListeners = () => {
 };
 
 document.addEventListener('DOMContentLoaded', installListeners);
-

@@ -1,45 +1,45 @@
 @extends('layouts.app')
 
-@section('title', 'Доставка')
+@section('title', __('pages.delivery.title'))
 
 @section('content')
     <section class="section">
         <div class="section-heading">
             <div>
-                <h2>Доставка, оплата, повернення</h2>
-                <p>TechnoDim доставляє техніку по Україні швидко, безпечно й у зручний спосіб.</p>
+                <h2>{{ __('pages.delivery.heading') }}</h2>
+                <p>{{ __('pages.delivery.subtitle') }}</p>
             </div>
         </div>
         <div class="section-grid">
             <div class="feature-card">
-                <h3>Нова Пошта</h3>
-                <p>Доставка протягом 1-2 днів у великі міста, накладений платіж до 30 000 грн та повне відстеження в додатку. Усі відправлення страхуються з гарантованим відшкодуванням.</p>
+                <h3>{{ __('pages.delivery.methods.nova_title') }}</h3>
+                <p>{{ __('pages.delivery.methods.nova_text') }}</p>
             </div>
             <div class="feature-card">
-                <h3>Укрпошта</h3>
-                <p>Доставляємо до відділень і поштоматів, відправка з понеділка по п’ятницю, термін 2-5 днів. Рекомендуємо для невеликих міст і сіл.</p>
+                <h3>{{ __('pages.delivery.methods.ukr_title') }}</h3>
+                <p>{{ __('pages.delivery.methods.ukr_text') }}</p>
             </div>
             <div class="feature-card">
-                <h3>Самовивіз</h3>
-                <p>Самовивіз можливий із нашого київського складу. Замовлення готове до видачі протягом 2 годин, пункти працюють до 20:00.</p>
+                <h3>{{ __('pages.delivery.methods.pickup_title') }}</h3>
+                <p>{{ __('pages.delivery.methods.pickup_text') }}</p>
             </div>
         </div>
     </section>
 
     <section class="section">
         <div class="section-heading">
-            <h2>Оплата та повернення</h2>
+            <h2>{{ __('pages.delivery.payment_returns_title') }}</h2>
         </div>
         <div class="grid-cards">
             <article class="product-card">
-                <h3>Оплата</h3>
-                <p>Підтримуємо картки Visa/Mastercard, Apple Pay, Google Pay і безготівковий розрахунок для корпоративних клієнтів. Передплата — опціонально, можна оплатити при отриманні.</p>
+                <h3>{{ __('pages.delivery.payment_title') }}</h3>
+                <p>{{ __('pages.delivery.payment_text') }}</p>
             </article>
             <article class="product-card">
-                <h3>Повернення</h3>
-                <p>Повернення без пояснень протягом 14 днів. Повертаємо кошти після отримання товару на склад, не утримуємо приховані комісії. Якісний сервіс репрезентує вашу безпеку.</p>
+                <h3>{{ __('pages.delivery.returns_title') }}</h3>
+                <p>{{ __('pages.delivery.returns_text') }}</p>
             </article>
         </div>
-        <p class="muted-note" style="color: var(--muted); font-size: 0.9rem;">Якщо товар не відповідає опису, ми допоможемо з поверненням через Нову пошту за наш рахунок.</p>
+        <p class="muted-note" style="color: var(--muted); font-size: 0.9rem;">{{ __('pages.delivery.note') }}</p>
     </section>
 @endsection

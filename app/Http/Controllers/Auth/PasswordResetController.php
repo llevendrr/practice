@@ -31,7 +31,7 @@ class PasswordResetController extends Controller
                 'error' => $exception->getMessage(),
             ]);
 
-            return back()->with('error', 'Не вдалося відправити лист, перевірте налаштування пошти.');
+            return back()->with('error', __('messages.auth.mail_failed'));
         }
 
         return $status === Password::RESET_LINK_SENT

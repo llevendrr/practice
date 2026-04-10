@@ -28,7 +28,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::post('/locale/{locale}', LocaleController::class)->name('locale.switch');
+Route::get('/locale/{locale}', LocaleController::class)->name('locale.switch');
 
 if (app()->environment('local')) {
     Route::get('/mail/test', function () {

@@ -61,7 +61,7 @@ class ProductController extends Controller
         if ($request->input('action') === 'sync_specs') {
             return redirect()
                 ->route('admin.products.create')
-                ->with('status', 'РҐР°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё РїС–РґРІР°РЅС‚Р°Р¶РµРЅРѕ.')
+                ->with('status', __('admin.products.flash.specs_synced'))
                 ->withInput($request->except('action'));
         }
 
@@ -110,7 +110,7 @@ class ProductController extends Controller
         if ($request->input('action') === 'sync_specs') {
             return redirect()
                 ->to(route('admin.products.edit', $product) . '#specs')
-                ->with('status', 'РҐР°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё РїС–РґРІР°РЅС‚Р°Р¶РµРЅРѕ.')
+                ->with('status', __('admin.products.flash.specs_synced'))
                 ->withInput($request->except('action'));
         }
 

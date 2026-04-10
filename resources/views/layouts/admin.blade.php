@@ -17,12 +17,9 @@
 
                 <div class="language-switcher" role="group" aria-label="{{ __('ui.language.label') }}">
                     @foreach (config('app.supported_locales', ['uk', 'en']) as $localeOption)
-                        <form action="{{ route('locale.switch', $localeOption) }}" method="post">
-                            @csrf
-                            <button type="submit" class="lang-btn {{ app()->getLocale() === $localeOption ? 'lang-btn--active' : '' }}">
-                                {{ __('ui.language.' . $localeOption) }}
-                            </button>
-                        </form>
+                        <a href="{{ route('locale.switch', $localeOption) }}" class="lang-btn {{ app()->getLocale() === $localeOption ? 'lang-btn--active' : '' }}">
+                            {{ __('ui.language.' . $localeOption) }}
+                        </a>
                     @endforeach
                 </div>
 

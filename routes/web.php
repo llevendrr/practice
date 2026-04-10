@@ -28,7 +28,12 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/locale/{locale}', LocaleController::class)->name('locale.switch');
+Route::get('/lang/{locale}', LocaleController::class)
+    ->whereIn('locale', config('app.supported_locales', ['uk', 'en']))
+    ->name('locale.switch');
+Route::get('/locale/{locale}', function (string $locale) {
+    return redirect()->route('locale.switch', ['locale' => $locale]);
+})->whereIn('locale', config('app.supported_locales', ['uk', 'en']));
 
 if (app()->environment('local')) {
     Route::get('/mail/test', function () {

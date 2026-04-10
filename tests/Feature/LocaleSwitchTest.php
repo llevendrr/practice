@@ -16,7 +16,19 @@ class LocaleSwitchTest extends TestCase
 
         $this->get('/')
             ->assertOk()
+            ->assertSee('lang="en"', false)
+            ->assertSee('lang-btn--active')
             ->assertSee('Home')
             ->assertSee('Catalog');
+    }
+
+    public function test_it_rejects_invalid_locale(): void
+    {
+        $this->get('/lang/de')->assertNotFound();
+    }
+
+    public function test_legacy_locale_url_redirects_to_new_route(): void
+    {
+        $this->get('/locale/en')->assertRedirect('/lang/en');
     }
 }

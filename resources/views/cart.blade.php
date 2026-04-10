@@ -28,9 +28,9 @@
                             <tr>
                                 <td>
                                     <strong>{{ $item['product']->name }}</strong><br>
-                                    {{ $item['product']->brand }} · {{ $item['product']->model }}
+                                    {{ $item['product']->brand }} Â· {{ $item['product']->model }}
                                 </td>
-                                <td>{{ number_format($item['product']->discounted_price, 0, ',', ' ') }}?</td>
+                                <td>{{ number_format($item['product']->discounted_price, 0, ',', ' ') }}&#8372;</td>
                                 <td>
                                     <form action="{{ route('cart.update', $item['product']) }}" method="post" class="table-actions">
                                         @csrf
@@ -39,7 +39,7 @@
                                         <button class="secondary-btn" type="submit">{{ __('cart.update') }}</button>
                                     </form>
                                 </td>
-                                <td>{{ number_format($item['subtotal'], 0, ',', ' ') }}?</td>
+                                <td>{{ number_format($item['subtotal'], 0, ',', ' ') }}&#8372;</td>
                                 <td>
                                     <form action="{{ route('cart.remove', $item['product']) }}" method="post">
                                         @csrf
@@ -54,7 +54,7 @@
             </div>
 
             <div class="cart-summary">
-                <p>{{ __('cart.total') }}: <strong>{{ number_format($total, 0, ',', ' ') }}?</strong></p>
+                <p>{{ __('cart.total') }}: <strong>{{ number_format($total, 0, ',', ' ') }}&#8372;</strong></p>
                 @auth
                     <a href="{{ route('checkout.index') }}" class="btn">{{ __('cart.checkout') }}</a>
                 @else

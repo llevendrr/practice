@@ -69,7 +69,7 @@
                     <tr>
                         <td>{{ $product->name }}</td>
                         <td>{{ $product->category?->name }}</td>
-                        <td>{{ number_format($product->discounted_price, 0, ',', ' ') }}?</td>
+                        <td>{{ number_format($product->discounted_price, 0, ',', ' ') }}&#8372;</td>
                         <td>{{ $product->stock }}</td>
                         <td class="table-actions">
                             <a class="btn btn--compact" href="{{ route('admin.products.edit', $product) }}">{{ __('admin.actions.edit') }}</a>
@@ -93,4 +93,3 @@
         {{ $products->appends(request()->query())->links('vendor.pagination.techno') }}
     </div>
 @endsection
-

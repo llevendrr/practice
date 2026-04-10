@@ -19,7 +19,7 @@
                     <p>{{ __('payment.select.postal_code') }}: {{ $order->postal_code }}</p>
                 @endif
                 <p>{{ __('payment.select.status') }}: <strong>{{ $order->status_label }}</strong></p>
-                <p class="muted-note">{{ __('payment.select.amount') }}: <strong>{{ number_format($order->total, 0, ',', ' ') }} грн</strong></p>
+                <p class="muted-note">{{ __('payment.select.amount') }}: <strong>{{ number_format($order->total, 0, ',', ' ') }} РіСЂРЅ</strong></p>
             </div>
             <div class="product-card">
                 <h3>{{ __('payment.select.method_title') }}</h3>

@@ -1,4 +1,4 @@
-@extends('layouts.app')
+ï»¿@extends('layouts.app')
 
 @section('title', __('home.title'))
 
@@ -21,9 +21,16 @@
                 <span class="hero-card__badge">{{ __('home.seller.badge') }}</span>
                 <p>{{ __('home.seller.description') }}</p>
                 <ul class="hero-card__list">
-                    <li>??? {{ __('home.seller.point_1') }}</li>
-                    <li>? {{ __('home.seller.point_2') }}</li>
-                    <li>?? {{ __('home.seller.point_3') }}</li>
+                    @for ($i = 1; $i <= 3; $i++)
+                        <li>
+                            <span class="list-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <path d="m5 12 4 4 10-10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </span>
+                            <span>{{ __('home.seller.point_' . $i) }}</span>
+                        </li>
+                    @endfor
                 </ul>
                 <div class="hero-card__stats">
                     <span>{{ __('home.seller.stat_products') }}</span>
@@ -54,12 +61,12 @@
                     />
                     <div>
                         <h3>{{ $product->name }}</h3>
-                        <p class="meta">{{ $product->brand }} · {{ $product->model }}</p>
+                        <p class="meta">{{ $product->brand }} Â· {{ $product->model }}</p>
                         @include('partials.product-rating', ['product' => $product])
                         <div class="price">
-                            <span>{{ number_format($product->discounted_price, 0, ',', ' ') }}?</span>
+                            <span>{{ number_format($product->discounted_price, 0, ',', ' ') }}&#8372;</span>
                             @if ($product->discount)
-                                <del>{{ number_format($product->price, 0, ',', ' ') }}?</del>
+                                <del>{{ number_format($product->price, 0, ',', ' ') }}&#8372;</del>
                             @endif
                         </div>
                     </div>
@@ -95,11 +102,11 @@
                     <img src="{{ $product->primaryImage?->url ?? 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=900&q=80' }}" alt="{{ $product->name }}" />
                     <div>
                         <h3>{{ $product->name }}</h3>
-                        <p class="meta">{{ $product->brand }} · {{ $product->model }}</p>
+                        <p class="meta">{{ $product->brand }} Â· {{ $product->model }}</p>
                         <div class="price">
-                            <span>{{ number_format($product->discounted_price, 0, ',', ' ') }}?</span>
+                            <span>{{ number_format($product->discounted_price, 0, ',', ' ') }}&#8372;</span>
                             @if ($product->discount)
-                                <del>{{ number_format($product->price, 0, ',', ' ') }}?</del>
+                                <del>{{ number_format($product->price, 0, ',', ' ') }}&#8372;</del>
                             @endif
                         </div>
                     </div>
@@ -128,7 +135,37 @@
         <div class="why-grid">
             @foreach ($whyHighlights as $highlight)
                 <article class="feature-card why-card">
-                    <div class="why-card__icon">{{ $highlight['icon'] }}</div>
+                    <div class="why-card__icon" aria-hidden="true">
+                        @switch($highlight['icon'])
+                            @case('bolt')
+                                <svg class="why-card__icon-svg" viewBox="0 0 24 24" fill="none">
+                                    <path d="M13 2 5 13h6l-1 9 9-12h-6l0-8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                                </svg>
+                            @break
+
+                            @case('support')
+                                <svg class="why-card__icon-svg" viewBox="0 0 24 24" fill="none">
+                                    <path d="M4 13v-1a8 8 0 1 1 16 0v1" stroke="currentColor" stroke-width="1.8"/>
+                                    <rect x="3" y="12" width="4" height="6" rx="1.5" stroke="currentColor" stroke-width="1.8"/>
+                                    <rect x="17" y="12" width="4" height="6" rx="1.5" stroke="currentColor" stroke-width="1.8"/>
+                                    <path d="M12 18v2c0 1.1-.9 2-2 2h-1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                </svg>
+                            @break
+
+                            @case('delivery')
+                                <svg class="why-card__icon-svg" viewBox="0 0 24 24" fill="none">
+                                    <path d="M3 7h11v8H3zM14 10h3l3 3v2h-6z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                                    <circle cx="8" cy="18" r="1.8" stroke="currentColor" stroke-width="1.8"/>
+                                    <circle cx="18" cy="18" r="1.8" stroke="currentColor" stroke-width="1.8"/>
+                                </svg>
+                            @break
+
+                            @default
+                                <svg class="why-card__icon-svg" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 21s-7-4.35-7-10a4 4 0 0 1 7-2.7A4 4 0 0 1 19 11c0 5.65-7 10-7 10Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                                </svg>
+                        @endswitch
+                    </div>
                     <h3>{{ $highlight['title'] }}</h3>
                     <p>{{ $highlight['description'] }}</p>
                 </article>

@@ -53,7 +53,7 @@ class OrderController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email',
             'phone' => ['required', 'regex:/^\d{9,15}$/'],
-            'shipping_method' => 'required|in:Íîâà Ïîøòà,Óêðïîøòà,Ñàìîâèâ³ç',
+            'shipping_method' => 'required|in:ÐÐ¾Ð²Ð° ÐŸÐ¾ÑˆÑ‚Ð°,Ð£ÐºÑ€Ð¿Ð¾ÑˆÑ‚Ð°,Ð¡Ð°Ð¼Ð¾Ð²Ð¸Ð²Ñ–Ð·',
             'shipping_cost' => 'required|numeric|min:0',
             'payment_status' => 'required|in:pending,paid',
             'status' => 'required|in:new,processing,shipped,done,canceled',

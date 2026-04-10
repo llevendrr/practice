@@ -111,19 +111,19 @@
             <div class="product-card">
                 <h3>{{ __('checkout.summary') }}</h3>
                 <div class="cart-summary">
-                    <p>{{ __('checkout.products_total') }}: <strong>{{ number_format($total, 0, ',', ' ') }}?</strong></p>
+                    <p>{{ __('checkout.products_total') }}: <strong>{{ number_format($total, 0, ',', ' ') }}&#8372;</strong></p>
                     @php
                         $selectedMethod = old('shipping_method', array_values($shippingMethods)[0]);
                         $shippingCost = \App\Http\Controllers\CheckoutController::SHIPPING_RATES[$selectedMethod] ?? 0;
                     @endphp
-                    <p>{{ __('checkout.shipping_total') }}: <strong>{{ $selectedMethod }} — {{ number_format($shippingCost, 0, ',', ' ') }}?</strong></p>
+                    <p>{{ __('checkout.shipping_total') }}: <strong>{{ $selectedMethod }} â€” {{ number_format($shippingCost, 0, ',', ' ') }}&#8372;</strong></p>
                     @if (old('city'))
                         <p>{{ __('checkout.city') }}: <strong>{{ old('city') }}</strong></p>
                     @endif
                     @if (old('street') || old('house'))
                         <p>{{ __('checkout.address') }}: <strong>{{ trim(implode(', ', array_filter([old('street'), old('house')]))) }}</strong></p>
                     @endif
-                    <p class="muted-note">{{ __('checkout.total') }}: <strong>{{ number_format($total + $shippingCost, 0, ',', ' ') }}?</strong></p>
+                    <p class="muted-note">{{ __('checkout.total') }}: <strong>{{ number_format($total + $shippingCost, 0, ',', ' ') }}&#8372;</strong></p>
                 </div>
             </div>
         </div>

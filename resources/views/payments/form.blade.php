@@ -19,7 +19,7 @@
                     <p>{{ __('payment.form.postal_code') }}: {{ $order->postal_code }}</p>
                 @endif
                 <p>{{ __('payment.form.status') }}: <strong>{{ $order->status_label }}</strong></p>
-                <p class="muted-note">{{ __('payment.form.amount') }}: <strong>{{ number_format($order->total, 0, ',', ' ') }} ãðí</strong></p>
+                <p class="muted-note">{{ __('payment.form.amount') }}: <strong>{{ number_format($order->total, 0, ',', ' ') }} Ð³Ñ€Ð½</strong></p>
             </div>
 
             <div class="product-card">
@@ -102,7 +102,7 @@
                                 type="password"
                                 inputmode="numeric"
                                 maxlength="4"
-                                placeholder="•••"
+                                placeholder="â€¢â€¢â€¢"
                                 value="{{ old('cvv') }}"
                                 data-credit-mask="cvv"
                             />

@@ -11,7 +11,7 @@
 
         <div class="product-card">
             <p>{{ __('payment.fail.order_number') }}: <strong>{{ $order->order_number }}</strong></p>
-            <p>{{ __('payment.fail.amount') }}: <strong>{{ number_format($order->total, 0, ',', ' ') }} грн</strong></p>
+            <p>{{ __('payment.fail.amount') }}: <strong>{{ number_format($order->total, 0, ',', ' ') }} РіСЂРЅ</strong></p>
 
             <div class="form-actions">
                 <a class="btn" href="{{ route('payment.card', $order) }}">{{ __('payment.fail.retry') }}</a>

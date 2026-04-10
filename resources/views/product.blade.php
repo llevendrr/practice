@@ -22,13 +22,13 @@
             </div>
 
             <div class="product-detail__info">
-                <p class="eyebrow">{{ __('product.meta_brand') }} � {{ $product->brand }}</p>
+                <p class="eyebrow">{{ __('product.meta_brand') }} · {{ $product->brand }}</p>
                 <h1>{{ $product->name }}</h1>
                 <p class="meta">{{ $product->model }}</p>
                 <div class="price">
-                    <span>{{ number_format($product->discounted_price, 0, ',', ' ') }}?</span>
+                    <span>{{ number_format($product->discounted_price, 0, ',', ' ') }}&#8372;</span>
                     @if ($product->discount)
-                        <del>{{ number_format($product->price, 0, ',', ' ') }}?</del>
+                        <del>{{ number_format($product->price, 0, ',', ' ') }}&#8372;</del>
                     @endif
                 </div>
                 <p class="product-detail__description">{{ $product->description }}</p>
@@ -54,10 +54,10 @@
                 <h3>{{ __('product.specifications') }}</h3>
                 <table class="cart-table">
                     <tbody>
-                        @foreach ($product->specifications ?? [] as $key => $value)
+                        @foreach ($product->specifications ? [] as $key => $value)
                             @php
                                 $definition = $specDefinitions[$key] ?? null;
-                                $label = $definition?->label ??
+                                $label = $definition?->label ?
                                     \Illuminate\Support\Str::of($key)->replace('_', ' ')->title();
                             @endphp
                             <tr>
@@ -75,7 +75,7 @@
                     @forelse ($product->reviews as $review)
                         <div class="review">
                             <strong>{{ $review->user->name }}</strong>
-                            <div class="stars">{{ str_repeat('?', $review->rating) }}{{ str_repeat('?', 5 - $review->rating) }}</div>
+                            <div class="stars">{{ str_repeat('★', $review->rating) }}{{ str_repeat('☆', 5 - $review->rating) }}</div>
                             <p>{{ $review->comment }}</p>
                         </div>
                     @empty
@@ -123,9 +123,9 @@
                         <h3>{{ $item->name }}</h3>
                         <p class="meta">{{ $item->brand }}</p>
                         <div class="price">
-                            <span>{{ number_format($item->discounted_price, 0, ',', ' ') }}?</span>
+                            <span>{{ number_format($item->discounted_price, 0, ',', ' ') }}&#8372;</span>
                             @if ($item->discount)
-                                <del>{{ number_format($item->price, 0, ',', ' ') }}?</del>
+                                <del>{{ number_format($item->price, 0, ',', ' ') }}&#8372;</del>
                             @endif
                         </div>
                     </div>

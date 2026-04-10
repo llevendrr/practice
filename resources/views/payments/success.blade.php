@@ -11,11 +11,11 @@
 
         <div class="product-card">
             <p>{{ __('payment.success.order_number') }}: <strong>{{ $order->order_number }}</strong></p>
-            <p>{{ __('payment.success.amount') }}: <strong>{{ number_format($order->total, 0, ',', ' ') }} ãðí</strong></p>
+            <p>{{ __('payment.success.amount') }}: <strong>{{ number_format($order->total, 0, ',', ' ') }} Ð³Ñ€Ð½</strong></p>
             @if ($order->payment_reference)
                 <p>{{ __('payment.success.reference') }}: <strong>{{ $order->payment_reference }}</strong></p>
             @endif
-            <p>{{ __('payment.success.paid_at') }}: <strong>{{ $order->paid_at ? $order->paid_at->format('d.m.Y H:i') : '—' }}</strong></p>
+            <p>{{ __('payment.success.paid_at') }}: <strong>{{ $order->paid_at ? $order->paid_at->format('d.m.Y H:i') : 'â€”' }}</strong></p>
 
             <div class="form-actions">
                 <a class="btn" href="{{ route('orders') }}">{{ __('payment.success.to_orders') }}</a>

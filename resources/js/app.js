@@ -2,23 +2,37 @@ import './bootstrap';
 
 const themeStorageKey = 'technodim-theme';
 const locale = document.documentElement.lang.startsWith('uk') ? 'uk' : 'en';
+const defaultThemeI18n = {
+    uk: {
+        light: 'Ð¡Ð²Ñ–Ñ‚Ð»Ð° Ñ‚ÐµÐ¼Ð°',
+        dark: 'Ð¢ÐµÐ¼Ð½Ð° Ñ‚ÐµÐ¼Ð°',
+        ariaPrefix: 'ÐŸÐ¾Ñ‚Ð¾Ñ‡Ð½Ð° Ñ‚ÐµÐ¼Ð°:',
+        ariaAction: 'ÐÐ°Ñ‚Ð¸ÑÐ½Ñ–Ñ‚ÑŒ, Ñ‰Ð¾Ð± Ð¿ÐµÑ€ÐµÐ¼ÐºÐ½ÑƒÑ‚Ð¸.',
+    },
+    en: {
+        light: 'Light theme',
+        dark: 'Dark theme',
+        ariaPrefix: 'Current theme:',
+        ariaAction: 'Press to toggle.',
+    },
+};
 
 const i18n = {
     uk: {
         theme: {
-            light: 'Ñâ³òëà òåìà',
-            dark: 'Òåìíà òåìà',
-            ariaPrefix: 'Ïîòî÷íà òåìà:',
-            ariaAction: 'Íàòèñí³òü, ùîá ïåðåìêíóòè.',
+            light: 'Ð¡Ð²Ñ–Ñ‚Ð»Ð° Ñ‚ÐµÐ¼Ð°',
+            dark: 'Ð¢ÐµÐ¼Ð½Ð° Ñ‚ÐµÐ¼Ð°',
+            ariaPrefix: 'ÐŸÐ¾Ñ‚Ð¾Ñ‡Ð½Ð° Ñ‚ÐµÐ¼Ð°:',
+            ariaAction: 'ÐÐ°Ñ‚Ð¸ÑÐ½Ñ–Ñ‚ÑŒ, Ñ‰Ð¾Ð± Ð¿ÐµÑ€ÐµÐ¼ÐºÐ½ÑƒÑ‚Ð¸.',
         },
         spec: {
-            enterPrefix: 'Âêàæ³òü',
-            choosePrefix: 'Âèáåð³òü',
-            prompt: 'Ñïî÷àòêó îáåð³òü êàòåãîð³þ, ùîá ïîáà÷èòè íàá³ð õàðàêòåðèñòèê.',
-            empty: 'Äëÿ ö³º¿ êàòåãîð³¿ íå çàäàíî õàðàêòåðèñòèê.',
-            loading: 'Çàâàíòàæåííÿ õàðàêòåðèñòèê…',
-            loadError: 'Íå âäàëîñÿ çàâàíòàæèòè õàðàêòåðèñòèêè. Ñïðîáóéòå ùå ðàç.',
-            loadErrorAlert: 'Íå âäàëîñÿ çàâàíòàæèòè õàðàêòåðèñòèêè. Ïåðåâ³ðòå ³íòåðíåò-ç?ºäíàííÿ àáî ñïðîáóéòå çíîâó.',
+            enterPrefix: 'Ð’ÐºÐ°Ð¶Ñ–Ñ‚ÑŒ',
+            choosePrefix: 'Ð’Ð¸Ð±ÐµÑ€Ñ–Ñ‚ÑŒ',
+            prompt: 'Ð¡Ð¿Ð¾Ñ‡Ð°Ñ‚ÐºÑƒ Ð¾Ð±ÐµÑ€Ñ–Ñ‚ÑŒ ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ñ–ÑŽ, Ñ‰Ð¾Ð± Ð¿Ð¾Ð±Ð°Ñ‡Ð¸Ñ‚Ð¸ Ð½Ð°Ð±Ñ–Ñ€ Ñ…Ð°Ñ€Ð°ÐºÑ‚ÐµÑ€Ð¸ÑÑ‚Ð¸Ðº.',
+            empty: 'Ð”Ð»Ñ Ñ†Ñ–Ñ”Ñ— ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ñ–Ñ— Ð½Ðµ Ð·Ð°Ð´Ð°Ð½Ð¾ Ñ…Ð°Ñ€Ð°ÐºÑ‚ÐµÑ€Ð¸ÑÑ‚Ð¸Ðº.',
+            loading: 'Ð—Ð°Ð²Ð°Ð½Ñ‚Ð°Ð¶ÐµÐ½Ð½Ñ Ñ…Ð°Ñ€Ð°ÐºÑ‚ÐµÑ€Ð¸ÑÑ‚Ð¸Ðºâ€¦',
+            loadError: 'ÐÐµ Ð²Ð´Ð°Ð»Ð¾ÑÑ Ð·Ð°Ð²Ð°Ð½Ñ‚Ð°Ð¶Ð¸Ñ‚Ð¸ Ñ…Ð°Ñ€Ð°ÐºÑ‚ÐµÑ€Ð¸ÑÑ‚Ð¸ÐºÐ¸. Ð¡Ð¿Ñ€Ð¾Ð±ÑƒÐ¹Ñ‚Ðµ Ñ‰Ðµ Ñ€Ð°Ð·.',
+            loadErrorAlert: 'ÐÐµ Ð²Ð´Ð°Ð»Ð¾ÑÑ Ð·Ð°Ð²Ð°Ð½Ñ‚Ð°Ð¶Ð¸Ñ‚Ð¸ Ñ…Ð°Ñ€Ð°ÐºÑ‚ÐµÑ€Ð¸ÑÑ‚Ð¸ÐºÐ¸. ÐŸÐµÑ€ÐµÐ²Ñ–Ñ€Ñ‚Ðµ Ñ–Ð½Ñ‚ÐµÑ€Ð½ÐµÑ‚-Ð·â€™Ñ”Ð´Ð½Ð°Ð½Ð½Ñ Ð°Ð±Ð¾ ÑÐ¿Ñ€Ð¾Ð±ÑƒÐ¹Ñ‚Ðµ Ð·Ð½Ð¾Ð²Ñƒ.',
         },
     },
     en: {
@@ -33,7 +47,7 @@ const i18n = {
             choosePrefix: 'Choose',
             prompt: 'Select a category first to see specification fields.',
             empty: 'No specification fields are configured for this category.',
-            loading: 'Loading specification fields…',
+            loading: 'Loading specification fieldsâ€¦',
             loadError: 'Failed to load specification fields. Please try again.',
             loadErrorAlert: 'Failed to load specification fields. Check your connection and try again.',
         },
@@ -41,16 +55,28 @@ const i18n = {
 };
 
 const t = i18n[locale] ?? i18n.en;
+const fallbackThemeLabels = defaultThemeI18n[locale] ?? defaultThemeI18n.en;
 
 const getActiveTheme = () => (document.documentElement.classList.contains('light') ? 'light' : 'dark');
 
 const updateThemeControls = (mode) => {
-    const labels = t.theme;
-    const label = mode === 'light' ? labels.light : labels.dark;
-    const icon = mode === 'light' ? '\u2600\uFE0F' : '\uD83C\uDF19';
-
     document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
-        button.textContent = `${icon} ${label}`;
+        const labels = {
+            light: button.dataset.themeLight || fallbackThemeLabels.light,
+            dark: button.dataset.themeDark || fallbackThemeLabels.dark,
+            ariaPrefix: button.dataset.themeAriaPrefix || fallbackThemeLabels.ariaPrefix,
+            ariaAction: button.dataset.themeAriaAction || fallbackThemeLabels.ariaAction,
+        };
+        const label = mode === 'light' ? labels.light : labels.dark;
+        const labelElement = button.querySelector('[data-theme-toggle-label]');
+
+        if (labelElement) {
+            labelElement.textContent = label;
+        } else {
+            button.textContent = label;
+        }
+
+        button.dataset.theme = mode;
         button.setAttribute('aria-label', `${labels.ariaPrefix} ${label}. ${labels.ariaAction}`);
     });
 };

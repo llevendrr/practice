@@ -88,12 +88,12 @@
                             />
                             <div>
                                 <h3>{{ $product->name }}</h3>
-                                <p class="meta">{{ $product->brand }} · {{ $product->model }}</p>
+                                <p class="meta">{{ $product->brand }} Â· {{ $product->model }}</p>
                                 @include('partials.product-rating', ['product' => $product])
                                 <div class="price">
-                                    <span>{{ number_format($product->discounted_price, 0, ',', ' ') }}?</span>
+                                    <span>{{ number_format($product->discounted_price, 0, ',', ' ') }}&#8372;</span>
                                     @if ($product->discount)
-                                        <del>{{ number_format($product->price, 0, ',', ' ') }}?</del>
+                                        <del>{{ number_format($product->price, 0, ',', ' ') }}&#8372;</del>
                                     @endif
                                 </div>
                             </div>

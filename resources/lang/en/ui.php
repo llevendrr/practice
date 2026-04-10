@@ -21,6 +21,10 @@ return [
     ],
     'theme' => [
         'toggle' => 'Toggle theme',
+        'light' => 'Light theme',
+        'dark' => 'Dark theme',
+        'aria_prefix' => 'Current theme:',
+        'aria_action' => 'Press to toggle.',
     ],
     'language' => [
         'label' => 'Language',

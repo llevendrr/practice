@@ -15,9 +15,9 @@ class CheckoutController extends Controller
     }
 
     public const SHIPPING_RATES = [
-        'Íîâà Ïîøòà' => 150,
-        'Óêðïîøòà' => 110,
-        'Ñàìîâèâ³ç' => 0,
+        'ÐÐ¾Ð²Ð° ÐŸÐ¾ÑˆÑ‚Ð°' => 150,
+        'Ð£ÐºÑ€Ð¿Ð¾ÑˆÑ‚Ð°' => 110,
+        'Ð¡Ð°Ð¼Ð¾Ð²Ð¸Ð²Ñ–Ð·' => 0,
     ];
 
     public function index()

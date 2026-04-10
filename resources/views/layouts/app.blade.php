@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="{{ __('home.hero.description') }}">
-    <title>{{ config('app.name') }} · @yield('title', __('home.title')) </title>
+    <title>{{ config('app.name') }} Â· @yield('title', __('home.title')) </title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 

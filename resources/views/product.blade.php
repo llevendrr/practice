@@ -54,11 +54,10 @@
                 <h3>{{ __('product.specifications') }}</h3>
                 <table class="cart-table">
                     <tbody>
-                        @foreach ($product->specifications ? [] as $key => $value)
+                        @foreach (($product->specifications ?? []) as $key => $value)
                             @php
                                 $definition = $specDefinitions[$key] ?? null;
-                                $label = $definition?->label ?
-                                    \Illuminate\Support\Str::of($key)->replace('_', ' ')->title();
+                                $label = $definition?->label ?? \Illuminate\Support\Str::of($key)->replace('_', ' ')->title();
                             @endphp
                             <tr>
                                 <th>{{ $label }}</th>
@@ -74,7 +73,7 @@
                 <div class="reviews">
                     @forelse ($product->reviews as $review)
                         <div class="review">
-                            <strong>{{ $review->user->name }}</strong>
+                            <strong>{{ $review->user->name ?? 'Guest' }}</strong>
                             <div class="stars">{{ str_repeat('★', $review->rating) }}{{ str_repeat('☆', 5 - $review->rating) }}</div>
                             <p>{{ $review->comment }}</p>
                         </div>

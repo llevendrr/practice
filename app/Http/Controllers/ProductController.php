@@ -11,6 +11,7 @@ class ProductController extends Controller
         $product->load([
             'primaryImage',
             'images',
+            'category.specFields',
             'reviews' => fn ($query) => $query->approved()->with('user')->orderByDesc('created_at'),
         ]);
 

@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Support\Collection;
 
 class Product extends Model
 {
@@ -56,7 +55,8 @@ class Product extends Model
                 'created_at',
                 'updated_at',
             ])
-            ->orderBy('sort_order');
+            ->orderBy('sort_order')
+            ->orderBy('id');
     }
 
     public function primaryImage(): HasOne
@@ -119,11 +119,6 @@ class Product extends Model
         }
 
         return null;
-    }
-
-    public function getPrimaryImageAttribute(): ?ProductImage
-    {
-        return $this->images->first(fn ($image) => $image->is_primary) ?? $this->images->first();
     }
 
     public function getAverageRatingAttribute(): float

@@ -177,7 +177,7 @@
                         accept="image/jpeg,image/jpg,image/png,image/webp"
                     />
                     <p class="muted-note">
-                        Підтримуються JPG, JPEG, PNG та WEBP. Максимальний розмір — 10 МБ на файл.
+                        Підтримуються JPG, JPEG, PNG та WEBP. Максимальний розмір — 2 МБ на файл.
                     </p>
                     @error('images')
                         <span class="error-text">{{ $message }}</span>

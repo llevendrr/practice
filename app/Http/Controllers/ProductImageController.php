@@ -7,8 +7,10 @@ use Illuminate\Http\Response;
 
 class ProductImageController extends Controller
 {
-    public function show(ProductImage $productImage): Response
+    public function show(int $id): Response
     {
+        $productImage = ProductImage::query()->findOrFail($id);
+
         abort_if(blank($productImage->image_data), 404);
 
         return response($productImage->image_data, 200, [

@@ -21,6 +21,7 @@ class ProductImage extends Model
 
     protected $casts = [
         'is_primary' => 'boolean',
+        'sort_order' => 'integer',
     ];
 
     protected $appends = [
@@ -43,6 +44,6 @@ class ProductImage extends Model
 
     public function getPublicUrlAttribute(): string
     {
-        return route('product-images.show', $this);
+        return route('product-images.show', ['id' => $this->id]);
     }
 }

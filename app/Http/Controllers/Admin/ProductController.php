@@ -299,7 +299,7 @@ class ProductController extends Controller
             return;
         }
 
-        $nextSort = (($product->images()->max('sort_order')) ?? 0) + 1;
+        $nextSort = $this->nextSortOrder($product);
 
         $product->images()->create(array_merge($payload, [
             'is_primary' => true,
@@ -311,7 +311,7 @@ class ProductController extends Controller
     {
         $payload = $this->buildImagePayload($file);
         $hasPrimary = $product->images()->where('is_primary', true)->exists();
-        $nextSort = (($product->images()->max('sort_order')) ?? 0) + 1;
+        $nextSort = $this->nextSortOrder($product);
 
         $product->images()->create(array_merge($payload, [
             'is_primary' => ! $hasPrimary,
@@ -371,6 +371,13 @@ class ProductController extends Controller
         $safeBaseName = Str::slug($baseName) ?: 'product-image';
 
         return $safeBaseName . '-' . Str::uuid() . '.' . $extension;
+    }
+
+    protected function nextSortOrder(Product $product): int
+    {
+        $maxSortOrder = $product->images()->max('sort_order');
+
+        return $maxSortOrder === null ? 0 : ((int) $maxSortOrder + 1);
     }
 
     protected function logImageUploadException(

@@ -11,7 +11,7 @@
             <div class="product-detail__media">
                 <div class="product-gallery">
                     <div class="gallery-main">
-                        <img src="{{ $product->primary_image?->url ?? 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=900&q=80' }}" alt="{{ $product->name }}" />
+                        <img src="{{ $product->primaryImage?->url ?? 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=900&q=80' }}" alt="{{ $product->name }}" />
                     </div>
                     <div class="gallery-thumbs">
                         @foreach ($product->images as $image)
@@ -116,7 +116,7 @@
                         <span class="badge">{{ $item->badge }}</span>
                     @endif
                     <img
-                        src="{{ $item->primary_image?->url ?? 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=900&q=80' }}"
+                        src="{{ $item->primaryImage?->url ?? 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=900&q=80' }}"
                         alt="{{ $item->name }}"
                     />
                     <div>

@@ -9,6 +9,7 @@ class HomeController extends Controller
     public function index()
     {
         $newProducts = Product::active()
+            ->with('primaryImage')
             ->withApprovedRatings()
             ->where('is_new', true)
             ->orderByDesc('created_at')
@@ -16,6 +17,7 @@ class HomeController extends Controller
             ->get();
 
         $hitProducts = Product::active()
+            ->with('primaryImage')
             ->withApprovedRatings()
             ->where('is_hit', true)
             ->orderByDesc('popularity')

@@ -9,11 +9,13 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         $product->load([
+            'primaryImage',
             'images',
             'reviews' => fn ($query) => $query->approved()->with('user')->orderByDesc('created_at'),
         ]);
 
         $related = Product::active()
+            ->with('primaryImage')
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
             ->orderByDesc('popularity')

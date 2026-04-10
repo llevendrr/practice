@@ -83,7 +83,7 @@
                                 <span class="badge">{{ $product->badge }}</span>
                             @endif
                             <img
-                                src="{{ $product->primary_image?->url ?? 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=900&q=80' }}"
+                                src="{{ $product->primaryImage?->url ?? 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=900&q=80' }}"
                                 alt="{{ $product->name }}"
                             />
                             <div>

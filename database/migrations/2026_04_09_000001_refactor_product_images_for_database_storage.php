@@ -12,10 +12,14 @@ return new class extends Migration
         Schema::table('product_images', function (Blueprint $table) {
             $table->string('filename')->nullable()->after('product_id');
             $table->string('mime_type', 100)->nullable()->after('filename');
-            $table->longBlob('image_data')->nullable()->after('mime_type');
+            $table->binary('image_data')->nullable()->after('mime_type');
             $table->boolean('is_primary')->default(false)->after('image_data');
             $table->unsignedInteger('sort_order')->default(0)->after('is_primary');
         });
+
+        if (DB::connection()->getDriverName() === 'mysql') {
+            DB::statement('ALTER TABLE product_images MODIFY image_data LONGBLOB NULL');
+        }
 
         if (Schema::hasColumn('product_images', 'is_main')) {
             DB::table('product_images')->update([

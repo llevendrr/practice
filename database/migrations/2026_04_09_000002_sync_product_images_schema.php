@@ -19,7 +19,7 @@ return new class extends Migration
             }
 
             if (! Schema::hasColumn('product_images', 'image_data')) {
-                $table->longBlob('image_data')->nullable();
+                $table->binary('image_data')->nullable();
             }
 
             if (! Schema::hasColumn('product_images', 'is_primary')) {
@@ -57,6 +57,10 @@ return new class extends Migration
                 SET filename = COALESCE(filename, NULLIF(url, ''))
                 WHERE (filename IS NULL OR filename = '')
             ");
+        }
+
+        if (DB::connection()->getDriverName() === 'mysql' && Schema::hasColumn('product_images', 'image_data')) {
+            DB::statement('ALTER TABLE product_images MODIFY image_data LONGBLOB NULL');
         }
 
         DB::statement("

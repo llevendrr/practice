@@ -49,7 +49,7 @@
                         <span class="badge">{{ $product->badge }}</span>
                     @endif
                     <img
-                        src="{{ $product->primary_image?->url ?? 'https://images.unsplash.com/photo-1525182008055-f88b95ff7980?auto=format&fit=crop&w=900&q=80' }}"
+                        src="{{ $product->primaryImage?->url ?? 'https://images.unsplash.com/photo-1525182008055-f88b95ff7980?auto=format&fit=crop&w=900&q=80' }}"
                         alt="{{ $product->name }}"
                     />
                     <div>
@@ -93,7 +93,7 @@
                     @if ($product->badge)
                         <span class="badge">{{ $product->badge }}</span>
                     @endif
-                    <img src="{{ $product->primary_image?->url ?? 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=900&q=80' }}" alt="{{ $product->name }}" />
+                    <img src="{{ $product->primaryImage?->url ?? 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=900&q=80' }}" alt="{{ $product->name }}" />
                     <div>
                         <h3>{{ $product->name }}</h3>
                         <p class="meta">{{ $product->brand }} · {{ $product->model }}</p>

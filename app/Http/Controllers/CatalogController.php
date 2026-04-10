@@ -10,7 +10,7 @@ class CatalogController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with('images', 'category')
+        $query = Product::with('primaryImage', 'category')
             ->withApprovedRatings()
             ->active();
 

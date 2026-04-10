@@ -23,3 +23,14 @@ if (! function_exists('ukrainianPluralForm')) {
         return $forms[2];
     }
 }
+
+if (! function_exists('cartItemsLabel')) {
+    function cartItemsLabel(int $count): string
+    {
+        if (app()->getLocale() === 'uk') {
+            return ukrainianPluralForm($count, ['товар', 'товари', 'товарів']);
+        }
+
+        return $count === 1 ? 'item' : 'items';
+    }
+}

@@ -1,20 +1,24 @@
 @if ($paginator->hasPages())
-    <nav class="techno-pagination" role="navigation" aria-label="Навігація по сторінках">
+    <nav class="techno-pagination" role="navigation" aria-label="{{ __('ui.pagination.aria') }}">
         <ul class="pagination-list">
-            {{-- Previous --}}
             @if ($paginator->onFirstPage())
-                <li class="pagination-item pagination-item--disabled" aria-disabled="true">
-                    <span>{{ __('pagination.previous') }}</span>
+                <li class="pagination-item pagination-item--prev pagination-item--disabled" aria-disabled="true">
+                    <span class="pagination-link pagination-link--arrow" aria-hidden="true">
+                        <svg class="pagination-icon" viewBox="0 0 24 24" fill="none">
+                            <path d="M14.5 6.5L9 12l5.5 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </span>
                 </li>
             @else
-                <li class="pagination-item">
-                    <a class="pagination-link" href="{{ $paginator->previousPageUrl() }}" rel="prev">
-                        {{ __('pagination.previous') }}
+                <li class="pagination-item pagination-item--prev">
+                    <a class="pagination-link pagination-link--arrow" href="{{ $paginator->previousPageUrl() }}" rel="prev" aria-label="{{ __('pagination.previous') }}">
+                        <svg class="pagination-icon" viewBox="0 0 24 24" fill="none">
+                            <path d="M14.5 6.5L9 12l5.5 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
                     </a>
                 </li>
             @endif
 
-            {{-- Pagination Elements --}}
             @foreach ($elements as $element)
                 @if (is_string($element))
                     <li class="pagination-item pagination-item--dots" aria-disabled="true">
@@ -30,7 +34,7 @@
                             </li>
                         @else
                             <li class="pagination-item">
-                                <a class="pagination-link" href="{{ $url }}" aria-label="{{ __('Перейти на сторінку :page', ['page' => $page]) }}">
+                                <a class="pagination-link" href="{{ $url }}" aria-label="{{ __('ui.pagination.goto', ['page' => $page]) }}">
                                     {{ $page }}
                                 </a>
                             </li>
@@ -39,18 +43,24 @@
                 @endif
             @endforeach
 
-            {{-- Next --}}
             @if ($paginator->hasMorePages())
-                <li class="pagination-item">
-                    <a class="pagination-link" href="{{ $paginator->nextPageUrl() }}" rel="next">
-                        {{ __('pagination.next') }}
+                <li class="pagination-item pagination-item--next">
+                    <a class="pagination-link pagination-link--arrow" href="{{ $paginator->nextPageUrl() }}" rel="next" aria-label="{{ __('pagination.next') }}">
+                        <svg class="pagination-icon" viewBox="0 0 24 24" fill="none">
+                            <path d="M9.5 6.5L15 12l-5.5 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
                     </a>
                 </li>
             @else
-                <li class="pagination-item pagination-item--disabled" aria-disabled="true">
-                    <span>{{ __('pagination.next') }}</span>
+                <li class="pagination-item pagination-item--next pagination-item--disabled" aria-disabled="true">
+                    <span class="pagination-link pagination-link--arrow" aria-hidden="true">
+                        <svg class="pagination-icon" viewBox="0 0 24 24" fill="none">
+                            <path d="M9.5 6.5L15 12l-5.5 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </span>
                 </li>
             @endif
         </ul>
     </nav>
 @endif
+

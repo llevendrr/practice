@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\ProductRequest;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
+use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -14,11 +15,40 @@ use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::with('category')->orderByDesc('created_at')->paginate(12);
+        $filters = [
+            'q' => trim((string) $request->string('q')->value()),
+            'category_id' => $request->integer('category_id') ?: null,
+            'price_min' => $request->filled('price_min') ? (float) $request->input('price_min') : null,
+            'price_max' => $request->filled('price_max') ? (float) $request->input('price_max') : null,
+            'stock' => $request->input('stock'),
+        ];
 
-        return view('admin.products.index', compact('products'));
+        $products = Product::query()
+            ->with('category')
+            ->when($filters['q'] !== '', function ($query) use ($filters) {
+                $query->where(function ($searchQuery) use ($filters): void {
+                    $searchTerm = '%' . $filters['q'] . '%';
+                    $searchQuery->where('name', 'like', $searchTerm)
+                        ->orWhere('brand', 'like', $searchTerm)
+                        ->orWhere('model', 'like', $searchTerm);
+                });
+            })
+            ->when($filters['category_id'], fn ($query) => $query->where('category_id', $filters['category_id']))
+            ->when($filters['price_min'] !== null, fn ($query) => $query->where('price', '>=', $filters['price_min']))
+            ->when($filters['price_max'] !== null, fn ($query) => $query->where('price', '<=', $filters['price_max']))
+            ->when($filters['stock'] === 'in', fn ($query) => $query->where('stock', '>', 0))
+            ->when($filters['stock'] === 'out', fn ($query) => $query->where('stock', '<=', 0))
+            ->orderByDesc('created_at')
+            ->paginate(12)
+            ->withQueryString();
+
+        $categories = Category::query()
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        return view('admin.products.index', compact('products', 'categories', 'filters'));
     }
 
     public function create()
@@ -31,7 +61,7 @@ class ProductController extends Controller
         if ($request->input('action') === 'sync_specs') {
             return redirect()
                 ->route('admin.products.create')
-                ->with('status', 'Характеристики підвантажено.')
+                ->with('status', 'РҐР°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё РїС–РґРІР°РЅС‚Р°Р¶РµРЅРѕ.')
                 ->withInput($request->except('action'));
         }
 
@@ -48,11 +78,11 @@ class ProductController extends Controller
             report($exception);
 
             return back()
-                ->withErrors(['images' => 'Не вдалося зберегти зображення у базі даних. Спробуйте ще раз.'])
+                ->withErrors(['images' => __('admin.products.flash.images_failed')])
                 ->withInput();
         }
 
-        return redirect()->route('admin.products.index')->with('status', 'Товар створено.');
+        return redirect()->route('admin.products.index')->with('status', __('admin.products.flash.saved'));
     }
 
     public function edit(Product $product)
@@ -80,7 +110,7 @@ class ProductController extends Controller
         if ($request->input('action') === 'sync_specs') {
             return redirect()
                 ->to(route('admin.products.edit', $product) . '#specs')
-                ->with('status', 'Характеристики підвантажено.')
+                ->with('status', 'РҐР°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё РїС–РґРІР°РЅС‚Р°Р¶РµРЅРѕ.')
                 ->withInput($request->except('action'));
         }
 
@@ -97,18 +127,18 @@ class ProductController extends Controller
             report($exception);
 
             return back()
-                ->withErrors(['images' => 'Не вдалося зберегти зображення у базі даних. Зміни не збережено.'])
+                ->withErrors(['images' => __('admin.products.flash.images_failed')])
                 ->withInput();
         }
 
-        return redirect()->route('admin.products.index')->with('status', 'Товар оновлено.');
+        return redirect()->route('admin.products.index')->with('status', __('admin.products.flash.saved'));
     }
 
     public function destroy(Product $product)
     {
         $product->delete();
 
-        return back()->with('status', 'Товар видалено.');
+        return back()->with('status', __('admin.products.flash.deleted'));
     }
 
     protected function formatInput(ProductRequest $request, ?Product $product = null): array
@@ -116,15 +146,15 @@ class ProductController extends Controller
         $isSyncAction = $request->input('action') === 'sync_specs';
         $name = $request->filled('name')
             ? $request->name
-            : $product?->name ?? 'Товар без назви';
+            : $product?->name ?? 'РўРѕРІР°СЂ Р±РµР· РЅР°Р·РІРё';
 
         $brand = $request->filled('brand')
             ? $request->brand
-            : $product?->brand ?? 'Бренд';
+            : $product?->brand ?? 'Р‘СЂРµРЅРґ';
 
         $model = $request->filled('model')
             ? $request->model
-            : $product?->model ?? 'Модель';
+            : $product?->model ?? 'РњРѕРґРµР»СЊ';
 
         $slug = $request->input('slug')
             ?: $product?->slug
@@ -396,3 +426,6 @@ class ProductController extends Controller
         ]);
     }
 }
+
+
+

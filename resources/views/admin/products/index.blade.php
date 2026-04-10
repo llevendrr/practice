@@ -1,43 +1,90 @@
 @extends('layouts.admin')
 
-@section('title', 'Товари')
+@section('title', __('admin.products.title'))
 
 @section('content')
     <div class="admin-card">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h2>Товари</h2>
-            <a class="btn" href="{{ route('admin.products.create') }}">Додати товар</a>
+        <div class="admin-products-header">
+            <h2>{{ __('admin.products.title') }}</h2>
+            <a class="btn" href="{{ route('admin.products.create') }}">{{ __('admin.actions.add_product') }}</a>
         </div>
+
+        <form method="get" class="admin-filters" data-admin-product-filters>
+            <div class="field-group">
+                <label for="q">{{ __('admin.products.filters.search') }}</label>
+                <input id="q" name="q" type="search" value="{{ $filters['q'] ?? '' }}" placeholder="{{ __('admin.products.filters.search_placeholder') }}" data-filter-autosubmit="debounce" />
+            </div>
+
+            <div class="field-group">
+                <label for="category_id">{{ __('admin.products.filters.category') }}</label>
+                <select id="category_id" name="category_id" data-filter-autosubmit="change">
+                    <option value="">{{ __('admin.products.filters.all_categories') }}</option>
+                    @foreach ($categories as $category)
+                        <option value="{{ $category->id }}" @selected((string) ($filters['category_id'] ?? '') === (string) $category->id)>
+                            {{ $category->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="field-group">
+                <label for="price_min">{{ __('admin.products.filters.price_from') }}</label>
+                <input id="price_min" name="price_min" type="number" min="0" step="1" value="{{ $filters['price_min'] ?? '' }}" data-filter-autosubmit="debounce" />
+            </div>
+
+            <div class="field-group">
+                <label for="price_max">{{ __('admin.products.filters.price_to') }}</label>
+                <input id="price_max" name="price_max" type="number" min="0" step="1" value="{{ $filters['price_max'] ?? '' }}" data-filter-autosubmit="debounce" />
+            </div>
+
+            <div class="field-group">
+                <label for="stock">{{ __('admin.products.filters.stock') }}</label>
+                <select id="stock" name="stock" data-filter-autosubmit="change">
+                    <option value="">{{ __('admin.products.filters.stock_all') }}</option>
+                    <option value="in" @selected(($filters['stock'] ?? '') === 'in')>{{ __('admin.products.filters.stock_in') }}</option>
+                    <option value="out" @selected(($filters['stock'] ?? '') === 'out')>{{ __('admin.products.filters.stock_out') }}</option>
+                </select>
+            </div>
+
+            <div class="admin-filters__actions">
+                <button type="submit" class="secondary-btn">{{ __('admin.actions.apply_filters') }}</button>
+                <a class="secondary-btn" href="{{ route('admin.products.index') }}">{{ __('admin.actions.reset_filters') }}</a>
+            </div>
+        </form>
     </div>
 
     <div class="table-wrap">
         <table class="cart-table">
             <thead>
                 <tr>
-                    <th>Назва</th>
-                    <th>Категорія</th>
-                    <th>Ціна</th>
-                    <th>Наявність</th>
-                    <th></th>
+                    <th>{{ __('admin.products.columns.name') }}</th>
+                    <th>{{ __('admin.products.columns.category') }}</th>
+                    <th>{{ __('admin.products.columns.price') }}</th>
+                    <th>{{ __('admin.products.columns.stock') }}</th>
+                    <th>{{ __('admin.products.columns.actions') }}</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach ($products as $product)
+                @forelse ($products as $product)
                     <tr>
                         <td>{{ $product->name }}</td>
                         <td>{{ $product->category?->name }}</td>
-                        <td>{{ number_format($product->discounted_price, 0, ',', ' ') }}₴</td>
+                        <td>{{ number_format($product->discounted_price, 0, ',', ' ') }}?</td>
                         <td>{{ $product->stock }}</td>
                         <td class="table-actions">
-                            <a class="secondary-btn" href="{{ route('admin.products.edit', $product) }}">Редагувати</a>
+                            <a class="btn btn--compact" href="{{ route('admin.products.edit', $product) }}">{{ __('admin.actions.edit') }}</a>
                             <form action="{{ route('admin.products.destroy', $product) }}" method="post">
                                 @csrf
                                 @method('delete')
-                                <button class="secondary-btn" type="submit">Видалити</button>
+                                <button class="secondary-btn secondary-btn--danger" type="submit">{{ __('admin.actions.delete') }}</button>
                             </form>
                         </td>
                     </tr>
-                @endforeach
+                @empty
+                    <tr>
+                        <td colspan="5">{{ __('admin.products.empty') }}</td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
@@ -46,3 +93,4 @@
         {{ $products->appends(request()->query())->links('vendor.pagination.techno') }}
     </div>
 @endsection
+

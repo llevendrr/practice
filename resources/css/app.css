@@ -1921,3 +1921,139 @@ a {
         max-height: none;
     }
 }
+/* Localization switch */
+.language-switcher {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+}
+
+.language-switcher form {
+    margin: 0;
+}
+
+.lang-btn {
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text);
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.lang-btn:hover,
+.lang-btn:focus-visible {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.lang-btn--active {
+    color: #04050c;
+    background: var(--accent);
+    border-color: transparent;
+}
+
+/* Button consistency */
+.btn:active,
+.secondary-btn:active,
+.auth-button:active,
+.admin-link:active,
+.cart-btn:active {
+    transform: translateY(0);
+}
+
+/* Admin product filters */
+.admin-products-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.admin-filters {
+    margin-top: 1rem;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.85rem;
+    align-items: end;
+}
+
+.admin-filters .field-group {
+    margin: 0;
+}
+
+.admin-filters__actions {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+.btn--compact,
+.table-actions .secondary-btn {
+    min-height: 42px;
+    min-width: 120px;
+}
+
+/* Pagination arrows and states */
+.techno-pagination .pagination-item--prev,
+.techno-pagination .pagination-item--next {
+    min-width: 56px;
+}
+
+.techno-pagination .pagination-link--arrow {
+    min-width: 52px;
+    min-height: 44px;
+    padding: 0.45rem;
+}
+
+.techno-pagination .pagination-icon {
+    width: 18px;
+    height: 18px;
+    display: block;
+}
+
+.techno-pagination .pagination-item--disabled .pagination-link {
+    opacity: 0.42;
+    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.02);
+    pointer-events: none;
+}
+
+.techno-pagination .pagination-link:focus-visible {
+    outline: 2px solid rgba(162, 103, 255, 0.65);
+    outline-offset: 2px;
+}
+
+@media (max-width: 1200px) {
+    .admin-filters {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-filters {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-filters__actions {
+        width: 100%;
+    }
+
+    .admin-filters__actions .secondary-btn,
+    .admin-filters__actions a.secondary-btn {
+        width: 100%;
+    }
+}
+

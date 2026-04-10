@@ -1,15 +1,31 @@
 import './bootstrap';
 
 const themeStorageKey = 'technodim-theme';
+const locale = document.documentElement.lang.startsWith('uk') ? 'uk' : 'en';
 
 const getActiveTheme = () => (document.documentElement.classList.contains('light') ? 'light' : 'dark');
 
 const updateThemeControls = (mode) => {
-    const label = mode === 'light' ? 'Світла тема' : 'Темна тема';
-    const icon = mode === 'light' ? '☀️' : '🌙';
+    const dictionary = {
+        uk: {
+            light: 'Світла тема',
+            dark: 'Темна тема',
+            ariaPrefix: 'Поточна тема:',
+            ariaAction: 'Натисніть, щоб переключити.',
+        },
+        en: {
+            light: 'Light theme',
+            dark: 'Dark theme',
+            ariaPrefix: 'Current theme:',
+            ariaAction: 'Press to toggle.',
+        },
+    };
+    const labels = dictionary[locale];
+    const label = mode === 'light' ? labels.light : labels.dark;
+    const icon = mode === 'light' ? '\u2600\uFE0F' : '\uD83C\uDF19';
     document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
         button.textContent = `${icon} ${label}`;
-        button.setAttribute('aria-label', `Поточна тема: ${label}. Натисніть, щоб переключити.`);
+        button.setAttribute('aria-label', `${labels.ariaPrefix} ${label}. ${labels.ariaAction}`);
     });
 };
 
@@ -49,8 +65,8 @@ const renderInputForField = (field, value) => {
     const rawLabel = String(field.label ?? '');
     const label = escapeHtml(rawLabel);
     const lowerLabel = escapeHtml(rawLabel.toLowerCase());
-    const textPlaceholder = `Вкажіть ${label}`;
-    const selectPlaceholder = `Виберіть ${lowerLabel}`;
+    const textPlaceholder = `Р’РєР°Р¶С–С‚СЊ ${label}`;
+    const selectPlaceholder = `Р’РёР±РµСЂС–С‚СЊ ${lowerLabel}`;
 
     if (field.field_type === 'number') {
         return `
@@ -173,9 +189,9 @@ const installListeners = () => {
     if (specSelect && specContainer) {
         const specUrlTemplate = specSelect.dataset.specUrl;
         const specHint = document.querySelector('[data-spec-hint]');
-        const promptMessage = 'Спочатку оберіть категорію, щоб побачити набір характеристик.';
-        const emptyMessage = 'Для цієї категорії не задано характеристик.';
-        const loadingMessage = 'Завантаження характеристик…';
+        const promptMessage = 'РЎРїРѕС‡Р°С‚РєСѓ РѕР±РµСЂС–С‚СЊ РєР°С‚РµРіРѕСЂС–СЋ, С‰РѕР± РїРѕР±Р°С‡РёС‚Рё РЅР°Р±С–СЂ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРє.';
+        const emptyMessage = 'Р”Р»СЏ С†С–С”С— РєР°С‚РµРіРѕСЂС–С— РЅРµ Р·Р°РґР°РЅРѕ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРє.';
+        const loadingMessage = 'Р—Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєвЂ¦';
 
         const renderMessage = (message) => {
             specContainer.innerHTML = `<p class="muted-note">${message}</p>`;
@@ -262,8 +278,8 @@ const installListeners = () => {
                     .join('');
             } catch (error) {
                 console.error('Spec sync: failed to load fields', error);
-                renderMessage('Не вдалося завантажити характеристики. Спробуйте ще раз.');
-                alert('Не вдалося завантажити характеристики. Перевірте інтернет-з’єднання або спробуйте знову.');
+                renderMessage('РќРµ РІРґР°Р»РѕСЃСЏ Р·Р°РІР°РЅС‚Р°Р¶РёС‚Рё С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё. РЎРїСЂРѕР±СѓР№С‚Рµ С‰Рµ СЂР°Р·.');
+                alert('РќРµ РІРґР°Р»РѕСЃСЏ Р·Р°РІР°РЅС‚Р°Р¶РёС‚Рё С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё. РџРµСЂРµРІС–СЂС‚Рµ С–РЅС‚РµСЂРЅРµС‚-Р·вЂ™С”РґРЅР°РЅРЅСЏ Р°Р±Рѕ СЃРїСЂРѕР±СѓР№С‚Рµ Р·РЅРѕРІСѓ.');
             } finally {
                 refreshSpecState();
             }
@@ -276,6 +292,23 @@ const installListeners = () => {
 
         refreshSpecState();
         fetchSpecs();
+    }
+
+    const adminFiltersForm = document.querySelector('[data-admin-product-filters]');
+    if (adminFiltersForm) {
+        let timer = null;
+        adminFiltersForm.querySelectorAll('[data-filter-autosubmit]').forEach((field) => {
+            const mode = field.getAttribute('data-filter-autosubmit');
+            if (mode === 'change') {
+                field.addEventListener('change', () => adminFiltersForm.requestSubmit());
+                return;
+            }
+
+            field.addEventListener('input', () => {
+                clearTimeout(timer);
+                timer = setTimeout(() => adminFiltersForm.requestSubmit(), 350);
+            });
+        });
     }
 
     const themeToggleButtons = document.querySelectorAll('[data-theme-toggle]');
@@ -296,3 +329,4 @@ const installListeners = () => {
 };
 
 document.addEventListener('DOMContentLoaded', installListeners);
+

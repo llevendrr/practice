@@ -10,11 +10,25 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('product_images', function (Blueprint $table) {
-            $table->string('filename')->nullable()->after('product_id');
-            $table->string('mime_type', 100)->nullable()->after('filename');
-            $table->binary('image_data')->nullable()->after('mime_type');
-            $table->boolean('is_primary')->default(false)->after('image_data');
-            $table->unsignedInteger('sort_order')->default(0)->after('is_primary');
+            if (! Schema::hasColumn('product_images', 'filename')) {
+                $table->string('filename')->nullable()->after('product_id');
+            }
+
+            if (! Schema::hasColumn('product_images', 'mime_type')) {
+                $table->string('mime_type', 100)->nullable()->after('filename');
+            }
+
+            if (! Schema::hasColumn('product_images', 'image_data')) {
+                $table->binary('image_data')->nullable()->after('mime_type');
+            }
+
+            if (! Schema::hasColumn('product_images', 'is_primary')) {
+                $table->boolean('is_primary')->default(false)->after('image_data');
+            }
+
+            if (! Schema::hasColumn('product_images', 'sort_order')) {
+                $table->unsignedInteger('sort_order')->default(0)->after('is_primary');
+            }
         });
 
         if (DB::connection()->getDriverName() === 'mysql') {

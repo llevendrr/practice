@@ -45,7 +45,7 @@ class ProductImageWorkflowTest extends TestCase
         $this->assertNotEmpty($fullImage->image_data);
         $this->assertStringStartsWith('image/', $images[0]->mime_type);
 
-        $imageResponse = $this->get('/product-images/' . $images[0]->id);
+        $imageResponse = $this->get('/product-image/' . $images[0]->id);
 
         $imageResponse->assertOk();
         $imageResponse->assertHeader('Content-Type', $images[0]->mime_type);

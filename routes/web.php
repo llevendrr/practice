@@ -62,7 +62,8 @@ Route::view('/about', 'pages.about')->name('about');
 Route::view('/delivery', 'pages.delivery')->name('delivery');
 Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog');
 Route::get('/product/{product:slug}', [ProductController::class, 'show'])->name('product.show');
-Route::get('/product-images/{id}', [ProductImageController::class, 'show'])->name('product-images.show');
+Route::get('/product-image/{id}', [ProductImageController::class, 'show'])->name('product-image.show');
+Route::get('/product-images/{id}', fn (int $id) => redirect()->route('product-image.show', ['id' => $id], 301));
 Route::post('/product/{product:slug}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
 
 Route::get('/cart', [CartController::class, 'index'])->name('cart');

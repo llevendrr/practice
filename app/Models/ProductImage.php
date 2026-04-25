@@ -44,6 +44,6 @@ class ProductImage extends Model
 
     public function getPublicUrlAttribute(): string
     {
-        return route('product-images.show', ['id' => $this->id]);
+        return route('product-image.show', ['id' => $this->id]);
     }
 }

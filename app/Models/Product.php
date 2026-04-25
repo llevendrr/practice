@@ -55,6 +55,8 @@ class Product extends Model
                 'created_at',
                 'updated_at',
             ])
+            ->whereNotNull('image_data')
+            ->whereRaw('LENGTH(image_data) > 0')
             ->orderBy('sort_order')
             ->orderBy('id');
     }
@@ -72,7 +74,11 @@ class Product extends Model
                 'created_at',
                 'updated_at',
             ])
-            ->where('is_primary', true);
+            ->whereNotNull('image_data')
+            ->whereRaw('LENGTH(image_data) > 0')
+            ->orderByDesc('is_primary')
+            ->orderBy('sort_order')
+            ->orderBy('id');
     }
 
     public function reviews(): HasMany

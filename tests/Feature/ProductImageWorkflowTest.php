@@ -112,6 +112,83 @@ class ProductImageWorkflowTest extends TestCase
         $response->assertSessionHasErrors(['images.0', 'images.1']);
     }
 
+    public function test_it_falls_back_to_first_sorted_image_when_no_primary_flag_is_set(): void
+    {
+        $category = $this->createCategory();
+        $product = Product::query()->create([
+            'category_id' => $category->id,
+            'name' => 'Fallback Product',
+            'slug' => 'fallback-product-' . uniqid(),
+            'brand' => 'TechnoDim',
+            'model' => 'FB-1',
+            'price' => 12000,
+            'discount' => 0,
+            'stock' => 3,
+            'description' => 'Fallback image test',
+            'popularity' => 0,
+            'is_new' => false,
+            'is_hit' => false,
+            'is_active' => true,
+        ]);
+
+        ProductImage::query()->create([
+            'product_id' => $product->id,
+            'filename' => 'second.png',
+            'mime_type' => 'image/png',
+            'image_data' => $this->tinyPngBinary(),
+            'is_primary' => false,
+            'sort_order' => 2,
+        ]);
+
+        $firstImage = ProductImage::query()->create([
+            'product_id' => $product->id,
+            'filename' => 'first.png',
+            'mime_type' => 'image/png',
+            'image_data' => $this->tinyPngBinary(),
+            'is_primary' => false,
+            'sort_order' => 1,
+        ]);
+
+        $product->load('primaryImage');
+
+        $this->assertNotNull($product->primaryImage);
+        $this->assertSame($firstImage->id, $product->primaryImage->id);
+    }
+
+    public function test_it_detects_image_content_type_when_stored_mime_type_is_invalid(): void
+    {
+        $category = $this->createCategory();
+        $product = Product::query()->create([
+            'category_id' => $category->id,
+            'name' => 'Mime Product',
+            'slug' => 'mime-product-' . uniqid(),
+            'brand' => 'TechnoDim',
+            'model' => 'MIME-1',
+            'price' => 9000,
+            'discount' => 0,
+            'stock' => 2,
+            'description' => 'Mime detection test',
+            'popularity' => 0,
+            'is_new' => false,
+            'is_hit' => false,
+            'is_active' => true,
+        ]);
+
+        $image = ProductImage::query()->create([
+            'product_id' => $product->id,
+            'filename' => 'mime-test.png',
+            'mime_type' => 'application/octet-stream',
+            'image_data' => $this->tinyPngBinary(),
+            'is_primary' => true,
+            'sort_order' => 0,
+        ]);
+
+        $response = $this->get('/product-image/' . $image->id);
+
+        $response->assertOk();
+        $response->assertHeader('Content-Type', 'image/png');
+    }
+
     private function createAdmin(): User
     {
         return User::factory()->create([
@@ -128,5 +205,13 @@ class ProductImageWorkflowTest extends TestCase
             'order' => 1,
             'is_active' => true,
         ]);
+    }
+
+    private function tinyPngBinary(): string
+    {
+        return base64_decode(
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+X5tUAAAAASUVORK5CYII=',
+            true
+        ) ?: '';
     }
 }

@@ -351,21 +351,22 @@ class ProductController extends Controller
 
     protected function buildImagePayload(UploadedFile $file): array
     {
-        $realPath = $file->getRealPath();
+        $binary = $file->get();
 
-        if (! $realPath || ! is_readable($realPath)) {
-            throw new \RuntimeException('Uploaded image file is not readable.');
+        if (! is_string($binary) || $binary === '') {
+            throw new \RuntimeException('Uploaded image is empty or unreadable.');
         }
 
-        $binary = file_get_contents($realPath);
+        $mimeType = $file->getMimeType();
 
-        if ($binary === false || $binary === '') {
-            throw new \RuntimeException('Uploaded image is empty or unreadable.');
+        if (! is_string($mimeType) || ! str_starts_with($mimeType, 'image/')) {
+            $detectedMimeType = $this->detectMimeTypeFromBinary($binary);
+            $mimeType = is_string($detectedMimeType) ? $detectedMimeType : 'application/octet-stream';
         }
 
         return [
             'filename' => $this->imageFileName($file),
-            'mime_type' => $file->getMimeType() ?: 'application/octet-stream',
+            'mime_type' => $mimeType,
             'image_data' => $binary,
         ];
     }
@@ -374,24 +375,54 @@ class ProductController extends Controller
     {
         $selectedMain = $request->input('main_image');
 
+        $selectedId = null;
         if ($selectedMain) {
-            $selectedId = (int) $selectedMain;
+            $candidateId = (int) $selectedMain;
 
-            if (ProductImage::where('product_id', $product->id)->where('id', $selectedId)->exists()) {
-                ProductImage::where('product_id', $product->id)->update(['is_primary' => false]);
-                ProductImage::where('product_id', $product->id)->where('id', $selectedId)->update(['is_primary' => true]);
-
-                return;
+            if (ProductImage::where('product_id', $product->id)->where('id', $candidateId)->exists()) {
+                $selectedId = $candidateId;
             }
         }
 
-        if (! $product->images()->where('is_primary', true)->exists()) {
-            $fallback = $product->images()->orderBy('sort_order')->first();
-
-            if ($fallback) {
-                $fallback->update(['is_primary' => true]);
-            }
+        if (! $selectedId) {
+            $selectedId = ProductImage::query()
+                ->where('product_id', $product->id)
+                ->where('is_primary', true)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->value('id');
         }
+
+        if (! $selectedId) {
+            $selectedId = ProductImage::query()
+                ->where('product_id', $product->id)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->value('id');
+        }
+
+        ProductImage::query()
+            ->where('product_id', $product->id)
+            ->update(['is_primary' => false]);
+
+        if ($selectedId) {
+            ProductImage::query()
+                ->where('product_id', $product->id)
+                ->where('id', $selectedId)
+                ->update(['is_primary' => true]);
+        }
+    }
+
+    protected function detectMimeTypeFromBinary(string $binary): ?string
+    {
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->buffer($binary) ?: null;
+
+        if (is_string($mimeType) && str_starts_with($mimeType, 'image/')) {
+            return $mimeType;
+        }
+
+        return null;
     }
 
     protected function imageFileName(UploadedFile $file): string
@@ -426,6 +457,3 @@ class ProductController extends Controller
         ]);
     }
 }
-
-
-

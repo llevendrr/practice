@@ -46,7 +46,8 @@ class CatalogController extends Controller
             'popular' => $query->orderByDesc('popularity'),
             'price_asc' => $query->orderBy('price'),
             'price_desc' => $query->orderByDesc('price'),
-            default => $query->orderByDesc('created_at'),
+            'newest' => $query->orderByDesc('created_at'),
+            default => $query->inRandomOrder(),
         };
 
         $products = $query->paginate(12)->withQueryString();

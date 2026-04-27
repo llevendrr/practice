@@ -223,6 +223,135 @@ const setupCreditCardMasks = () => {
     });
 };
 
+const setupActionConfirmations = () => {
+    document.addEventListener('submit', (event) => {
+        const form = event.target;
+        if (!(form instanceof HTMLFormElement)) {
+            return;
+        }
+
+        const message = form.getAttribute('data-confirm');
+        if (message && !confirm(message)) {
+            event.preventDefault();
+        }
+    });
+
+    document.addEventListener('click', (event) => {
+        const trigger = event.target.closest('[data-confirm]');
+        if (!trigger) {
+            return;
+        }
+
+        const message = trigger.getAttribute('data-confirm');
+        if (message && !confirm(message)) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    });
+
+    document.querySelectorAll('[data-photo-delete-form]').forEach((form) => {
+        form.addEventListener('submit', (event) => {
+            const hasCheckedImages = Boolean(
+                form.querySelector('input[name="delete_images[]"]:checked')
+            );
+
+            if (!hasCheckedImages) {
+                return;
+            }
+
+            const message = form.getAttribute('data-photo-delete-confirm');
+            if (message && !confirm(message)) {
+                event.preventDefault();
+            }
+        });
+    });
+};
+
+const setupProductGalleries = () => {
+    document.querySelectorAll('[data-product-gallery]').forEach((gallery) => {
+        const slides = [...gallery.querySelectorAll('[data-gallery-slide]')];
+        if (!slides.length) {
+            return;
+        }
+
+        const thumbs = [...gallery.querySelectorAll('[data-gallery-thumb]')];
+        const prevButton = gallery.querySelector('[data-gallery-prev]');
+        const nextButton = gallery.querySelector('[data-gallery-next]');
+        const touchArea = gallery.querySelector('[data-gallery-main]');
+        let activeIndex = Math.max(
+            slides.findIndex((slide) => slide.classList.contains('is-active')),
+            0
+        );
+        let touchStartX = null;
+        let autoplayTimer = null;
+
+        const setActiveSlide = (nextIndex) => {
+            const normalizedIndex = (nextIndex + slides.length) % slides.length;
+            activeIndex = normalizedIndex;
+
+            slides.forEach((slide, index) => {
+                const isActive = index === normalizedIndex;
+                slide.classList.toggle('is-active', isActive);
+                slide.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+            });
+
+            thumbs.forEach((thumb, index) => {
+                thumb.classList.toggle('is-active', index === normalizedIndex);
+            });
+        };
+
+        const showNext = () => setActiveSlide(activeIndex + 1);
+        const showPrev = () => setActiveSlide(activeIndex - 1);
+
+        thumbs.forEach((thumb) => {
+            thumb.addEventListener('click', () => {
+                const nextIndex = Number(thumb.dataset.index);
+                if (Number.isInteger(nextIndex)) {
+                    setActiveSlide(nextIndex);
+                }
+            });
+        });
+
+        prevButton?.addEventListener('click', showPrev);
+        nextButton?.addEventListener('click', showNext);
+
+        touchArea?.addEventListener('touchstart', (event) => {
+            touchStartX = event.changedTouches[0]?.clientX ?? null;
+        });
+
+        touchArea?.addEventListener('touchend', (event) => {
+            if (touchStartX === null) {
+                return;
+            }
+
+            const touchEndX = event.changedTouches[0]?.clientX ?? touchStartX;
+            const deltaX = touchEndX - touchStartX;
+            touchStartX = null;
+
+            if (Math.abs(deltaX) < 30) {
+                return;
+            }
+
+            if (deltaX < 0) {
+                showNext();
+            } else {
+                showPrev();
+            }
+        });
+
+        const autoplaySeconds = Number(gallery.dataset.autoplay ?? 0);
+        if (autoplaySeconds > 0 && slides.length > 1) {
+            autoplayTimer = window.setInterval(showNext, autoplaySeconds * 1000);
+            gallery.addEventListener('mouseenter', () => window.clearInterval(autoplayTimer));
+            gallery.addEventListener('mouseleave', () => {
+                autoplayTimer = window.setInterval(showNext, autoplaySeconds * 1000);
+            });
+        }
+
+        setActiveSlide(activeIndex);
+    });
+};
+
 const installListeners = () => {
     const searchToggle = document.querySelector('[data-search-toggle]');
     const searchBox = document.querySelector('[data-site-search]');
@@ -369,6 +498,8 @@ const installListeners = () => {
 
     updateThemeControls(getActiveTheme());
     setupCreditCardMasks();
+    setupActionConfirmations();
+    setupProductGalleries();
 
     const chatScrollContainers = document.querySelectorAll('[data-chat-scroll]');
     chatScrollContainers.forEach((container) => {

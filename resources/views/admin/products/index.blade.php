@@ -6,7 +6,7 @@
     <div class="admin-card">
         <div class="admin-products-header">
             <h2>{{ __('admin.products.title') }}</h2>
-            <a class="btn" href="{{ route('admin.products.create') }}">{{ __('admin.actions.add_product') }}</a>
+            <a class="btn" href="{{ route('admin.products.create', request()->query()) }}">{{ __('admin.actions.add_product') }}</a>
         </div>
 
         <form method="get" class="admin-filters" data-admin-product-filters>
@@ -46,6 +46,15 @@
                 </select>
             </div>
 
+            <div class="field-group">
+                <label for="sort">{{ __('admin.products.filters.sort') }}</label>
+                <select id="sort" name="sort" data-filter-autosubmit="change">
+                    <option value="">{{ __('admin.products.filters.sort_default') }}</option>
+                    <option value="name_asc" @selected(($filters['sort'] ?? '') === 'name_asc')>{{ __('admin.products.filters.sort_name_asc') }}</option>
+                    <option value="name_desc" @selected(($filters['sort'] ?? '') === 'name_desc')>{{ __('admin.products.filters.sort_name_desc') }}</option>
+                </select>
+            </div>
+
             <div class="admin-filters__actions">
                 <button type="submit" class="secondary-btn">{{ __('admin.actions.apply_filters') }}</button>
                 <a class="secondary-btn" href="{{ route('admin.products.index') }}">{{ __('admin.actions.reset_filters') }}</a>
@@ -72,11 +81,21 @@
                         <td>{{ number_format($product->discounted_price, 0, ',', ' ') }}&#8372;</td>
                         <td>{{ $product->stock }}</td>
                         <td class="table-actions">
-                            <a class="btn btn--compact" href="{{ route('admin.products.edit', $product) }}">{{ __('admin.actions.edit') }}</a>
-                            <form action="{{ route('admin.products.destroy', $product) }}" method="post">
+                            <a class="btn btn--compact" href="{{ route('admin.products.edit', ['product' => $product] + request()->query()) }}">{{ __('admin.actions.edit') }}</a>
+                            <form
+                                action="{{ route('admin.products.destroy', ['product' => $product] + request()->query()) }}"
+                                method="post"
+                                data-confirm="{{ __('admin.products.confirm.delete_product') }}"
+                            >
                                 @csrf
                                 @method('delete')
-                                <button class="secondary-btn secondary-btn--danger" type="submit">{{ __('admin.actions.delete') }}</button>
+                                <button
+                                    class="secondary-btn secondary-btn--danger"
+                                    type="submit"
+                                    data-confirm="{{ __('admin.products.confirm.delete_product') }}"
+                                >
+                                    {{ __('admin.actions.delete') }}
+                                </button>
                             </form>
                         </td>
                     </tr>

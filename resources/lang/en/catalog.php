@@ -19,6 +19,7 @@ return [
         'all_items' => 'All products',
         'in_stock_only' => 'In-stock only',
         'sort' => 'Sorting',
+        'random' => 'Random order',
         'newest' => 'Newest first',
         'popular' => 'Popular',
         'price_asc' => 'Price ↑',

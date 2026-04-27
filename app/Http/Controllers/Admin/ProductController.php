@@ -15,6 +15,16 @@ use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
+    private const INDEX_FILTER_KEYS = [
+        'q',
+        'category_id',
+        'price_min',
+        'price_max',
+        'stock',
+        'sort',
+        'page',
+    ];
+
     public function index(Request $request)
     {
         $filters = [
@@ -23,9 +33,10 @@ class ProductController extends Controller
             'price_min' => $request->filled('price_min') ? (float) $request->input('price_min') : null,
             'price_max' => $request->filled('price_max') ? (float) $request->input('price_max') : null,
             'stock' => $request->input('stock'),
+            'sort' => $this->sanitizeSort($request->input('sort')),
         ];
 
-        $products = Product::query()
+        $productsQuery = Product::query()
             ->with('category')
             ->when($filters['q'] !== '', function ($query) use ($filters) {
                 $query->where(function ($searchQuery) use ($filters): void {
@@ -39,10 +50,11 @@ class ProductController extends Controller
             ->when($filters['price_min'] !== null, fn ($query) => $query->where('price', '>=', $filters['price_min']))
             ->when($filters['price_max'] !== null, fn ($query) => $query->where('price', '<=', $filters['price_max']))
             ->when($filters['stock'] === 'in', fn ($query) => $query->where('stock', '>', 0))
-            ->when($filters['stock'] === 'out', fn ($query) => $query->where('stock', '<=', 0))
-            ->orderByDesc('created_at')
-            ->paginate(12)
-            ->withQueryString();
+            ->when($filters['stock'] === 'out', fn ($query) => $query->where('stock', '<=', 0));
+
+        $this->applySorting($productsQuery, $filters['sort']);
+
+        $products = $productsQuery->paginate(12)->withQueryString();
 
         $categories = Category::query()
             ->orderBy('name')
@@ -51,16 +63,19 @@ class ProductController extends Controller
         return view('admin.products.index', compact('products', 'categories', 'filters'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        return $this->renderForm();
+        return $this->renderForm(
+            request: $request,
+            backUrl: $this->resolveIndexUrl($request)
+        );
     }
 
     public function store(ProductRequest $request)
     {
         if ($request->input('action') === 'sync_specs') {
             return redirect()
-                ->route('admin.products.create')
+                ->to($this->appendQuery(route('admin.products.create'), $this->resolveFilterState($request)))
                 ->with('status', __('admin.products.flash.specs_synced'))
                 ->withInput($request->except('action'));
         }
@@ -82,15 +97,24 @@ class ProductController extends Controller
                 ->withInput();
         }
 
-        return redirect()->route('admin.products.index')->with('status', __('admin.products.flash.saved'));
+        return redirect()->to($this->resolveIndexUrl($request))->with('status', __('admin.products.flash.saved'));
     }
 
-    public function edit(Product $product)
+    public function edit(Request $request, Product $product)
     {
-        return $this->renderForm($product);
+        return $this->renderForm(
+            request: $request,
+            product: $product,
+            backUrl: $this->resolveIndexUrl($request)
+        );
     }
 
-    protected function renderForm(?Product $product = null, ?int $overrideCategoryId = null)
+    protected function renderForm(
+        Request $request,
+        ?Product $product = null,
+        ?int $overrideCategoryId = null,
+        ?string $backUrl = null
+    )
     {
         $categories = Category::orderBy('order')->get();
         $oldCategoryId = session('_old_input.category_id');
@@ -101,15 +125,19 @@ class ProductController extends Controller
         }
 
         $specFields = $this->specFieldsFor($categoryId);
+        $returnState = $this->extractFilterState($request);
+        $backUrl ??= $this->resolveIndexUrl($request);
 
-        return view('admin.products.form', compact('product', 'categories', 'specFields'));
+        return view('admin.products.form', compact('product', 'categories', 'specFields', 'backUrl', 'returnState'));
     }
 
     public function update(ProductRequest $request, Product $product)
     {
         if ($request->input('action') === 'sync_specs') {
+            $editUrl = $this->appendQuery(route('admin.products.edit', $product), $this->resolveFilterState($request));
+
             return redirect()
-                ->to(route('admin.products.edit', $product) . '#specs')
+                ->to($editUrl . '#specs')
                 ->with('status', __('admin.products.flash.specs_synced'))
                 ->withInput($request->except('action'));
         }
@@ -131,14 +159,88 @@ class ProductController extends Controller
                 ->withInput();
         }
 
-        return redirect()->route('admin.products.index')->with('status', __('admin.products.flash.saved'));
+        return redirect()->to($this->resolveIndexUrl($request))->with('status', __('admin.products.flash.saved'));
     }
 
-    public function destroy(Product $product)
+    public function destroy(Request $request, Product $product)
     {
         $product->delete();
 
-        return back()->with('status', __('admin.products.flash.deleted'));
+        return redirect()->to($this->resolveIndexUrl($request))->with('status', __('admin.products.flash.deleted'));
+    }
+
+    protected function applySorting($query, string $sort): void
+    {
+        match ($sort) {
+            'name_asc' => $query->orderBy('name'),
+            'name_desc' => $query->orderByDesc('name'),
+            default => $query->orderByDesc('created_at'),
+        };
+    }
+
+    protected function sanitizeSort(?string $sort): string
+    {
+        return in_array($sort, ['name_asc', 'name_desc'], true) ? $sort : '';
+    }
+
+    protected function extractFilterState(Request $request): array
+    {
+        return collect($request->query())
+            ->only(self::INDEX_FILTER_KEYS)
+            ->filter(fn ($value) => $value !== null && $value !== '')
+            ->toArray();
+    }
+
+    protected function extractStateFromPayload(Request $request): array
+    {
+        $encodedState = $request->input('_index_state');
+        if (! is_string($encodedState) || $encodedState === '') {
+            return [];
+        }
+
+        $decodedJson = base64_decode($encodedState, true);
+        if (! is_string($decodedJson) || $decodedJson === '') {
+            return [];
+        }
+
+        $state = json_decode($decodedJson, true);
+        if (! is_array($state)) {
+            return [];
+        }
+
+        return collect($state)
+            ->only(self::INDEX_FILTER_KEYS)
+            ->filter(fn ($value) => $value !== null && $value !== '')
+            ->toArray();
+    }
+
+    protected function resolveFilterState(Request $request): array
+    {
+        $payloadState = $this->extractStateFromPayload($request);
+        if (! empty($payloadState)) {
+            return $payloadState;
+        }
+
+        return $this->extractFilterState($request);
+    }
+
+    protected function resolveIndexUrl(Request $request): string
+    {
+        $query = $this->resolveFilterState($request);
+        if (! empty($query)) {
+            return $this->appendQuery(route('admin.products.index'), $query);
+        }
+
+        return route('admin.products.index');
+    }
+
+    protected function appendQuery(string $url, array $query): string
+    {
+        if (empty($query)) {
+            return $url;
+        }
+
+        return $url . '?' . http_build_query($query);
     }
 
     protected function formatInput(ProductRequest $request, ?Product $product = null): array

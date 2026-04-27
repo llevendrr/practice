@@ -14,6 +14,7 @@
         <table class="cart-table">
             <thead>
                 <tr>
+                    <th>Image</th>
                     <th>Номер</th>
                     <th>Клієнт</th>
                     <th>Статус</th>
@@ -24,7 +25,20 @@
             </thead>
             <tbody>
                 @foreach ($orders as $order)
+                    @php
+                        $previewImage = $order->items->first()?->product?->primaryImage;
+                    @endphp
                     <tr>
+                        <td>
+                            @if ($previewImage)
+                                <img
+                                    src="{{ route('product-image.show', ['id' => $previewImage->id]) }}"
+                                    alt="Фото товару"
+                                    loading="lazy"
+                                    style="width:52px;height:52px;object-fit:cover;border-radius:10px;border:1px solid rgba(255,255,255,.14);"
+                                >
+                            @endif
+                        </td>
                         <td>{{ $order->order_number }}</td>
                         <td>{{ $order->name }}</td>
                         <td>{{ $order->status_label }}</td>

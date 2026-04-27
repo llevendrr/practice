@@ -5,19 +5,60 @@
 @section('content')
     @php
         $specDefinitions = $specFields ?? collect();
+        $galleryImages = $product->images
+            ->filter(fn ($image) => filled($image->id))
+            ->sortBy([
+                ['is_primary', 'desc'],
+                ['sort_order', 'asc'],
+                ['id', 'asc'],
+            ])
+            ->values();
     @endphp
     <section class="section">
         <div class="product-detail">
             <div class="product-detail__media">
-                <div class="product-gallery">
-                    <div class="gallery-main">
-                        <img src="{{ $product->primaryImage?->url ?? 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=900&q=80' }}" alt="{{ $product->name }}" />
+                <div class="product-gallery" data-product-gallery data-autoplay="0">
+                    <div class="gallery-main" data-gallery-main>
+                        @forelse ($galleryImages as $image)
+                            <figure class="gallery-slide {{ $loop->first ? 'is-active' : '' }}" data-gallery-slide data-index="{{ $loop->index }}" aria-hidden="{{ $loop->first ? 'false' : 'true' }}">
+                                <img
+                                    src="{{ route('product-image.show', ['id' => $image->id]) }}"
+                                    alt="{{ $product->name }}"
+                                    loading="{{ $loop->first ? 'eager' : 'lazy' }}"
+                                />
+                            </figure>
+                        @empty
+                            <figure class="gallery-slide is-active" data-gallery-slide data-index="0" aria-hidden="false">
+                                <img
+                                    src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=900&q=80"
+                                    alt="{{ $product->name }}"
+                                    loading="eager"
+                                />
+                            </figure>
+                        @endforelse
                     </div>
-                    <div class="gallery-thumbs">
-                        @foreach ($product->images as $image)
-                            <img src="{{ $image->url }}" alt="{{ $product->name }}" class="{{ $loop->first ? 'active' : '' }}" />
-                        @endforeach
-                    </div>
+
+                    @if ($galleryImages->count() > 1)
+                        <button type="button" class="gallery-nav gallery-nav--prev" data-gallery-prev aria-label="Попереднє фото">‹</button>
+                        <button type="button" class="gallery-nav gallery-nav--next" data-gallery-next aria-label="Наступне фото">›</button>
+                        <div class="gallery-thumbs" data-gallery-thumbs>
+                            @foreach ($galleryImages as $image)
+                                <button
+                                    type="button"
+                                    class="gallery-thumb {{ $loop->first ? 'is-active' : '' }}"
+                                    data-gallery-thumb
+                                    data-index="{{ $loop->index }}"
+                                    aria-label="Фото {{ $loop->iteration }}"
+                                >
+                                    <img
+                                        src="{{ route('product-image.show', ['id' => $image->id]) }}"
+                                        alt="{{ $product->name }}"
+                                        loading="lazy"
+                                    />
+                                </button>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
             </div>
 
@@ -115,7 +156,7 @@
                         <span class="badge">{{ $item->badge }}</span>
                     @endif
                     <img
-                        src="{{ $item->primaryImage?->url ?? 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=900&q=80' }}"
+                        src="{{ $item->primaryImage?->id ? route('product-image.show', ['id' => $item->primaryImage->id]) : 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=900&q=80' }}"
                         alt="{{ $item->name }}"
                     />
                     <div>

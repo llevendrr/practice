@@ -42,6 +42,18 @@ return [
             'stock_all' => 'Any',
             'stock_in' => 'In stock',
             'stock_out' => 'Out of stock',
+            'sort' => 'Sorting',
+            'sort_default' => 'Newest first',
+            'sort_name_asc' => 'Name A-Z',
+            'sort_name_desc' => 'Name Z-A',
+        ],
+        'back_to_list' => 'Back to list',
+        'create_title' => 'Create product',
+        'edit_title' => 'Edit product',
+        'confirm' => [
+            'delete_product' => 'Delete this product? This action cannot be undone.',
+            'delete_photo' => 'Remove selected photo(s) from this product?',
+            'delete_category' => 'Delete this category? This action cannot be undone.',
         ],
         'flash' => [
             'saved' => 'Product saved.',

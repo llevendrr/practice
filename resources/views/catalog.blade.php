@@ -64,7 +64,8 @@
                     <div class="field-group">
                         <label for="sort">{{ __('catalog.filters.sort') }}</label>
                         <select name="sort" id="sort">
-                            <option value="">{{ __('catalog.filters.newest') }}</option>
+                            <option value="">{{ __('catalog.filters.random') }}</option>
+                            <option value="newest" {{ request('sort') === 'newest' ? 'selected' : '' }}>{{ __('catalog.filters.newest') }}</option>
                             <option value="popular" {{ request('sort') === 'popular' ? 'selected' : '' }}>{{ __('catalog.filters.popular') }}</option>
                             <option value="price_asc" {{ request('sort') === 'price_asc' ? 'selected' : '' }}>{{ __('catalog.filters.price_asc') }}</option>
                             <option value="price_desc" {{ request('sort') === 'price_desc' ? 'selected' : '' }}>{{ __('catalog.filters.price_desc') }}</option>

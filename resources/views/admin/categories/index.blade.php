@@ -28,10 +28,10 @@
                         <td>{{ $category->is_active ? 'Активна' : 'Неактивна' }}</td>
                         <td class="table-actions">
                             <a class="secondary-btn" href="{{ route('admin.categories.edit', $category) }}">Редагувати</a>
-                            <form action="{{ route('admin.categories.destroy', $category) }}" method="post">
+                            <form action="{{ route('admin.categories.destroy', $category) }}" method="post" data-confirm="{{ __('admin.products.confirm.delete_category') }}">
                                 @csrf
                                 @method('delete')
-                                <button class="secondary-btn" type="submit">Видалити</button>
+                                <button class="secondary-btn" type="submit" data-confirm="{{ __('admin.products.confirm.delete_category') }}">Видалити</button>
                             </form>
                             <a class="secondary-btn" href="{{ route('admin.categories.specs.index', $category) }}">Характеристики</a>
                         </td>

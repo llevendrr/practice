@@ -11,13 +11,21 @@
     @endphp
 
     <div class="admin-card">
-        <h2>{{ isset($product) ? 'Редагувати товар' : 'Створити товар' }}</h2>
-        <form action="{{ isset($product) ? route('admin.products.update', $product) : route('admin.products.store') }}" method="post" enctype="multipart/form-data">
+        <div class="admin-products-header">
+            <h2>{{ isset($product) ? __('admin.products.edit_title') : __('admin.products.create_title') }}</h2>
+            <a class="secondary-btn" href="{{ $backUrl ?? route('admin.products.index') }}">{{ __('admin.products.back_to_list') }}</a>
+        </div>
+        <form
+            action="{{ isset($product) ? route('admin.products.update', $product) : route('admin.products.store') }}"
+            method="post"
+            enctype="multipart/form-data"
+            data-photo-delete-form
+            data-photo-delete-confirm="{{ __('admin.products.confirm.delete_photo') }}"
+        >
             @csrf
             @if (isset($product))
                 @method('patch')
             @endif
-
             <div class="form-grid">
                 <div class="field-group">
                     <label for="name">Назва</label>
@@ -213,7 +221,9 @@
                     </div>
                 </div>
             @endif
-
+            @if (! empty($returnState ?? []))
+                <input type="hidden" name="_index_state" value="{{ base64_encode(json_encode($returnState)) }}">
+            @endif
             <button class="btn" type="submit" name="action" value="save">Зберегти товар</button>
         </form>
     </div>

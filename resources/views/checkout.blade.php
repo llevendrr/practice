@@ -39,7 +39,12 @@
                         <label for="shipping_method">{{ __('checkout.shipping') }}</label>
                         <select id="shipping_method" name="shipping_method">
                             @foreach ($shippingMethods as $methodCode => $methodData)
-                                <option value="{{ $methodCode }}" {{ old('shipping_method', 'nova_poshta') === $methodCode ? 'selected' : '' }}>
+                                <option
+                                    value="{{ $methodCode }}"
+                                    data-label="{{ $methodData['label'] }}"
+                                    data-rate="{{ $methodData['rate'] }}"
+                                    {{ old('shipping_method', 'nova_poshta') === $methodCode ? 'selected' : '' }}
+                                >
                                     {{ $methodData['label'] }}
                                 </option>
                             @endforeach
@@ -110,23 +115,55 @@
 
             <div class="product-card">
                 <h3>{{ __('checkout.summary') }}</h3>
-                <div class="cart-summary">
+                <div class="cart-summary" id="checkout-summary" data-subtotal="{{ $total }}">
                     <p>{{ __('checkout.products_total') }}: <strong>{{ number_format($total, 0, ',', ' ') }}&#8372;</strong></p>
                     @php
                         $selectedMethodCode = old('shipping_method', 'nova_poshta');
                         $selectedMethod = $shippingMethods[$selectedMethodCode] ?? $shippingMethods['nova_poshta'];
                         $shippingCost = $selectedMethod['rate'];
                     @endphp
-                    <p>{{ __('checkout.shipping_total') }}: <strong>{{ $selectedMethod['label'] }} — {{ number_format($shippingCost, 0, ',', ' ') }}&#8372;</strong></p>
+                    <p>{{ __('checkout.shipping_total') }}: <strong id="shipping-total">{{ $selectedMethod['label'] }} - {{ number_format($shippingCost, 0, ',', ' ') }}&#8372;</strong></p>
                     @if (old('city'))
                         <p>{{ __('checkout.city') }}: <strong>{{ old('city') }}</strong></p>
                     @endif
                     @if (old('street') || old('house'))
                         <p>{{ __('checkout.address') }}: <strong>{{ trim(implode(', ', array_filter([old('street'), old('house')]))) }}</strong></p>
                     @endif
-                    <p class="muted-note">{{ __('checkout.total') }}: <strong>{{ number_format($total + $shippingCost, 0, ',', ' ') }}&#8372;</strong></p>
+                    <p class="muted-note">{{ __('checkout.total') }}: <strong id="grand-total">{{ number_format($total + $shippingCost, 0, ',', ' ') }}&#8372;</strong></p>
                 </div>
             </div>
         </div>
     </section>
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const shippingSelect = document.getElementById('shipping_method');
+            const summary = document.getElementById('checkout-summary');
+            const shippingTotal = document.getElementById('shipping-total');
+            const grandTotal = document.getElementById('grand-total');
+
+            if (!shippingSelect || !summary || !shippingTotal || !grandTotal) {
+                return;
+            }
+
+            const subtotal = Number(summary.dataset.subtotal) || 0;
+
+            const formatUah = (value) => `${new Intl.NumberFormat('uk-UA').format(value)}₴`;
+
+            const recalculateTotals = () => {
+                const selectedOption = shippingSelect.options[shippingSelect.selectedIndex];
+                const shippingLabel = selectedOption.dataset.label || selectedOption.textContent.trim();
+                const shippingRate = Number(selectedOption.dataset.rate) || 0;
+                const total = subtotal + shippingRate;
+
+                shippingTotal.textContent = `${shippingLabel} - ${formatUah(shippingRate)}`;
+                grandTotal.textContent = formatUah(total);
+            };
+
+            shippingSelect.addEventListener('change', recalculateTotals);
+            recalculateTotals();
+        });
+    </script>
+@endpush

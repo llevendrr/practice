@@ -14,10 +14,10 @@ class CheckoutController extends Controller
     {
     }
 
-    public const SHIPPING_RATES = [
-        'Нова Пошта' => 150,
-        'Укрпошта' => 110,
-        'Самовивіз' => 0,
+    public const SHIPPING_METHODS = [
+        'nova_poshta' => ['label' => 'Нова Пошта', 'rate' => 150],
+        'ukrposhta' => ['label' => 'Укрпошта', 'rate' => 110],
+        'pickup' => ['label' => 'Самовивіз', 'rate' => 0],
     ];
 
     public function index()
@@ -31,7 +31,7 @@ class CheckoutController extends Controller
         return view('checkout', [
             'items' => $items,
             'total' => $this->cartService->total(),
-            'shippingMethods' => array_keys(self::SHIPPING_RATES),
+            'shippingMethods' => self::SHIPPING_METHODS,
         ]);
     }
 
@@ -43,7 +43,8 @@ class CheckoutController extends Controller
             return redirect()->route('cart')->with('error', __('messages.checkout.empty_cart'));
         }
 
-        $shippingCost = self::SHIPPING_RATES[$request->shipping_method] ?? 0;
+        $selectedShipping = self::SHIPPING_METHODS[$request->shipping_method] ?? self::SHIPPING_METHODS['pickup'];
+        $shippingCost = $selectedShipping['rate'];
         $subtotal = $this->cartService->total();
 
         $order = Order::create([
@@ -52,7 +53,7 @@ class CheckoutController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
-            'shipping_method' => $request->shipping_method,
+            'shipping_method' => $selectedShipping['label'],
             'shipping_city' => $request->city,
             'shipping_street' => $request->street,
             'shipping_house' => $request->house,

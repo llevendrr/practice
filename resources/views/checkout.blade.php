@@ -38,9 +38,9 @@
                     <div class="field-group">
                         <label for="shipping_method">{{ __('checkout.shipping') }}</label>
                         <select id="shipping_method" name="shipping_method">
-                            @foreach ($shippingMethods as $method)
-                                <option value="{{ $method }}" {{ old('shipping_method') === $method ? 'selected' : '' }}>
-                                    {{ $method }}
+                            @foreach ($shippingMethods as $methodCode => $methodData)
+                                <option value="{{ $methodCode }}" {{ old('shipping_method', 'nova_poshta') === $methodCode ? 'selected' : '' }}>
+                                    {{ $methodData['label'] }}
                                 </option>
                             @endforeach
                         </select>
@@ -113,10 +113,11 @@
                 <div class="cart-summary">
                     <p>{{ __('checkout.products_total') }}: <strong>{{ number_format($total, 0, ',', ' ') }}&#8372;</strong></p>
                     @php
-                        $selectedMethod = old('shipping_method', array_values($shippingMethods)[0]);
-                        $shippingCost = \App\Http\Controllers\CheckoutController::SHIPPING_RATES[$selectedMethod] ?? 0;
+                        $selectedMethodCode = old('shipping_method', 'nova_poshta');
+                        $selectedMethod = $shippingMethods[$selectedMethodCode] ?? $shippingMethods['nova_poshta'];
+                        $shippingCost = $selectedMethod['rate'];
                     @endphp
-                    <p>{{ __('checkout.shipping_total') }}: <strong>{{ $selectedMethod }} — {{ number_format($shippingCost, 0, ',', ' ') }}&#8372;</strong></p>
+                    <p>{{ __('checkout.shipping_total') }}: <strong>{{ $selectedMethod['label'] }} — {{ number_format($shippingCost, 0, ',', ' ') }}&#8372;</strong></p>
                     @if (old('city'))
                         <p>{{ __('checkout.city') }}: <strong>{{ old('city') }}</strong></p>
                     @endif
